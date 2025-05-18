@@ -1,0 +1,9 @@
+
+
+/server/routes/index.js (Updated)
+
+js
+
+Copy code
+
+const express = require('express'); const router = express.Router(); router.use('/auth', require('./authRoutes')); router.use('/wallets', require('./walletRoutes')); router.use('/bot', require('./botRoutes')); module.exports = router;

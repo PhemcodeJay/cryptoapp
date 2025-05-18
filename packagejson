@@ -1,0 +1,7 @@
+📁 package.json
+
+json
+
+Copy code
+
+{ "name": "crypto-app", "version": "1.0.0", "main": "server/server.js", "scripts": { "start": "node server/server.js", "dev": "NODE_ENV=staging node server/server.js" }, "dependencies": { "axios": "^1.6.0", "cookie-parser": "^1.4.6", "dotenv": "^16.0.3", "express": "^4.18.2", "jsonwebtoken": "^9.0.0", "mysql2": "^3.2.4", "sequelize": "^6.32.1" } } 
