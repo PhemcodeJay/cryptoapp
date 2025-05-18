@@ -1,1 +1,0 @@
-// BotControl.js placeholder

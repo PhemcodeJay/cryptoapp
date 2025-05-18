@@ -1,9 +1,3 @@
 
-
-/server/controllers/walletController.js
-
-js
-
-Copy code
-
-const walletService = require('../services/walletService'); exports.addWallet = async (req, res) => { try { const wallet = await walletService.addWallet(req.body); res.status(201).json(wallet); } catch (err) { res.status(400).json({ error: err.message }); } }; exports.getWallets = async (req, res) => { try { const wallets = await walletService.getWallets(req.query.userId); res.json(wallets); } catch (err) { res.status(400).json({ error: err.message }); } }; 
+const walletService = require('../services/walletService'); 
+exports.addWallet = async (req, res) => { try { const wallet = await walletService.addWallet(req.body); res.status(201).json(wallet); } catch (err) { res.status(400).json({ error: err.message }); } }; exports.getWallets = async (req, res) => { try { const wallets = await walletService.getWallets(req.query.userId); res.json(wallets); } catch (err) { res.status(400).json({ error: err.message }); } }; 

@@ -1,1 +1,0 @@
-// wallet.js placeholder

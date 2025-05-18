@@ -1,9 +1,0 @@
-
-
-/server/services/botService.js
-
-js
-
-Copy code
-
-const axios = require('axios'); const technicalIndicators = require('technicalindicators'); exports.analyzeIndicators = async (symbol) => { const { data } = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1h&limit=200`); const closes = data.map(d => parseFloat(d[4])); const ma20 = technicalIndicators.SMA.calculate({ period: 20, values: closes }); const ma200 = technicalIndicators.SMA.calculate({ period: 200, values: closes }); const rsi = technicalIndicators.RSI.calculate({ period: 14, values: closes }); const stochRsi = technicalIndicators.StochasticRSI.calculate({ values: closes, rsiPeriod: 14, stochasticPeriod: 14, kPeriod: 3, dPeriod: 3 }); const volume = data.map(d => parseFloat(d[5])); return { ma20: ma20[ma20.length - 1], ma200: ma200[ma200.length - 1], rsi: rsi[rsi.length - 1], stochRsi: stochRsi[stochRsi.length - 1], volume: volume[volume.length - 1] }; }; 
