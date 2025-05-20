@@ -1,1 +1,0 @@
-// cookieVerifier.js placeholder

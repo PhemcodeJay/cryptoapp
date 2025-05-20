@@ -1,6 +1,6 @@
-// middleware/errorLogger.js
+// server/middleware/errorLogger.js
 
-const { logError } = require('../utils/logger');
+const { logError } = require('../../utils/logger'); // Adjusted path to root/utils/logger.js
 
 // Handles Express errors and logs them
 const errorLogger = (err, req, res, next) => {
