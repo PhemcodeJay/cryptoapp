@@ -1,1 +1,0 @@
-// WalletSummary.js placeholder

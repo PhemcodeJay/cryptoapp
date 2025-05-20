@@ -1,1 +1,0 @@
-// BotConfigForm.js placeholder
