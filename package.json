@@ -35,7 +35,8 @@
     "@web3-react/injected-connector": "^6.0.7",
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
-    "chart.js": "^4.4.0",
+    "chart.js": "^4.4.9",
+    "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -46,7 +47,7 @@
     "mysql2": "^3.6.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "react-chartjs-2": "^5.2.0",
+    "react-chartjs-2": "^5.3.0",
     "sequelize": "^6.37.0",
     "winston": "^3.11.0"
   },
