@@ -1,20 +1,22 @@
 // server/middleware/passportJwtStrategy.js
 
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const User = require('../models/User'); // ✅ Import User model directly
+const { Strategy: JwtStrategy } = require('passport-jwt');
 const dotenv = require('dotenv');
+const User = require('../models/User'); // Sequelize User model
 
 dotenv.config();
 
-module.exports = (passport) => {
-  const cookieExtractor = (req) => {
-    let token = null;
-    if (req && req.cookies) {
-      token = req.cookies.token;  // Extract JWT from cookie named 'token'
-    }
-    return token;
-  };
+/**
+ * Custom cookie extractor to retrieve JWT from a secure HTTP-only cookie
+ */
+const cookieExtractor = (req) => {
+  return req?.cookies?.access_token || null; // Consistent with authCookies.js
+};
 
+/**
+ * Initialize Passport JWT Strategy
+ */
+module.exports = (passport) => {
   const options = {
     jwtFromRequest: cookieExtractor,
     secretOrKey: process.env.JWT_SECRET,
@@ -35,7 +37,7 @@ module.exports = (passport) => {
 
         return done(null, user);
       } catch (err) {
-        console.error('Passport JWT error:', err);
+        console.error('Passport JWT Strategy Error:', err);
         return done(err, false);
       }
     })

@@ -1,14 +1,34 @@
 // server/middleware/errorLogger.js
 
-const { logError } = require('../../utils/logger'); // Adjusted path to root/utils/logger.js
+const { logError } = require('../../utils/logger');
 
-// Handles Express errors and logs them
+/**
+ * Express error-handling middleware.
+ * Logs errors and returns appropriate JSON response based on environment.
+ */
 const errorLogger = (err, req, res, next) => {
-  logError(`Unhandled error in ${req.method} ${req.url}`, err);
+  const context = `${req.method} ${req.originalUrl}`;
+  const isDev = process.env.NODE_ENV !== 'production';
 
-  res.status(500).json({
+  // Always log full error on server
+  logError(`Unhandled error in ${context}`, err);
+
+  // In development, send detailed error message
+  if (isDev) {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+      error: {
+        message: err.message,
+        stack: err.stack,
+      },
+    });
+  }
+
+  // In production, keep responses minimal
+  return res.status(500).json({
     success: false,
-    error: 'Internal Server Error',
+    message: 'Something went wrong. Please try again later.',
   });
 };
 

@@ -5,17 +5,28 @@ const {
   MYSQL_HOST,
   MYSQL_USER,
   MYSQL_PASSWORD,
-  MYSQL_DATABASE
+  MYSQL_DATABASE,
+  DB_LOGGING
 } = process.env;
 
 if (!MYSQL_HOST || !MYSQL_USER || !MYSQL_DATABASE) {
   throw new Error('❌ Missing required MySQL environment variables in .env');
 }
 
-const sequelize = new Sequelize(MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, {
+if (!MYSQL_PASSWORD) {
+  console.warn('⚠️ MYSQL_PASSWORD is not set, connecting without password');
+}
+
+const sequelize = new Sequelize(MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD || '', {
   host: MYSQL_HOST,
   dialect: 'mysql',
-  logging: false, // set to console.log to enable SQL logs
+  logging: DB_LOGGING === 'true' ? console.log : false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
 });
 
 const testConnection = async () => {
@@ -28,9 +39,9 @@ const testConnection = async () => {
   }
 };
 
-const syncModels = async () => {
+const syncModels = async (options = {}) => {
   try {
-    await sequelize.sync();
+    await sequelize.sync(options);
     console.log('✅ Models synced successfully.');
   } catch (error) {
     console.error('❌ Error syncing models:', error);

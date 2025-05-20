@@ -1,13 +1,16 @@
+// utils/logger.js
+
 const path = require('path');
 const fs = require('fs');
 const winston = require('winston');
 
 // Ensure log directory exists
-const logDir = path.join(__dirname, '../logs');
+const logDir = path.resolve(__dirname, '../logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
+// Create Winston logger instance
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -17,7 +20,6 @@ const logger = winston.createLogger({
     })
   ),
   transports: [
-    new winston.transports.Console(),
     new winston.transports.File({
       filename: path.join(logDir, 'error.log'),
       level: 'error',
@@ -28,13 +30,24 @@ const logger = winston.createLogger({
   ],
 });
 
-// Simple helper to log structured errors
-const logFile = path.join(__dirname, '../logs/error.log');
+// Log to console in development
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
+}
 
+/**
+ * Logs an error with a custom label.
+ * @param {string} label - Context or module label.
+ * @param {Error|string} error - The error object or message.
+ */
 const logError = (label, error) => {
-  const message = `[${new Date().toISOString()}] ${label}: ${error.stack || error}\n`;
-  console.error(message); // ensure it logs to console too
-  fs.appendFileSync(logFile, message);
+  const message = `${label}: ${error?.stack || error}`;
+  logger.error(message);
 };
 
-module.exports = { logger, logError };
+module.exports = {
+  logger,
+  logError,
+};

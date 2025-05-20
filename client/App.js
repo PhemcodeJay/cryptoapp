@@ -1,27 +1,26 @@
-// App.js placeholder
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import IndexPage from './pages/IndexPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import PortfolioPage from './pages/PortfolioPage';
-import BotConfigPage from './pages/BotConfigPage';
+import Index from '../pages/index';  // your index.jsx page
+import BotConfigPage from '../pages/BotConfigPage';
+import DashboardPage from '../pages/DashboardPage';
+import LoginPage from '../pages/LoginPage';
+import PortfolioPage from '../pages/PortfolioPage';
+import RegisterPage from '../pages/RegisterPage';
 
-const App = () => {
+function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<IndexPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/" element={<Index />} />
         <Route path="/bot-config" element={<BotConfigPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;

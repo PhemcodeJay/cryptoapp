@@ -1,23 +1,37 @@
 -- -----------------------------------------------------
--- Schema for Crypto Trading App
+-- Schema for Web3 Crypto Trading App (Wallet Connect Users)
 -- -----------------------------------------------------
 -- MySQL version: 8+
 -- Charset: utf8mb4
 -- Collation: utf8mb4_general_ci
 -- -----------------------------------------------------
 
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+-- -----------------------------------------------------
+-- Table `users`
+-- -----------------------------------------------------
 CREATE TABLE `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(191) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
+  `walletAddress` VARCHAR(42) NOT NULL,
+  `nonce` TEXT DEFAULT NULL,
+  `username` VARCHAR(50) DEFAULT NULL,
+  `status` ENUM('pending', 'active', 'suspended') NOT NULL DEFAULT 'pending',
+  `role` ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+  `profileComplete` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_email` (`email`)
+  UNIQUE KEY `unique_wallet_address` (`walletAddress`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
-
+-- Table `wallets`
+-- -----------------------------------------------------
 CREATE TABLE `wallets` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT UNSIGNED NOT NULL,
@@ -26,12 +40,14 @@ CREATE TABLE `wallets` (
   `label` VARCHAR(100) DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  UNIQUE KEY `unique_user_chain_address` (`user_id`, `chain`, `address`)
+  UNIQUE KEY `unique_user_chain_address` (`user_id`, `chain`, `address`),
+  CONSTRAINT `fk_wallet_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
-
+-- Table `bots`
+-- -----------------------------------------------------
 CREATE TABLE `bots` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT UNSIGNED NOT NULL,
@@ -50,7 +66,8 @@ CREATE TABLE `bots` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
-
+-- Table `bot_trades`
+-- -----------------------------------------------------
 CREATE TABLE `bot_trades` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `bot_id` INT UNSIGNED NOT NULL,
@@ -68,7 +85,8 @@ CREATE TABLE `bot_trades` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
-
+-- Table `bot_signals`
+-- -----------------------------------------------------
 CREATE TABLE `bot_signals` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `bot_id` INT UNSIGNED NOT NULL,
@@ -82,7 +100,8 @@ CREATE TABLE `bot_signals` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
-
+-- Table `indicator_values`
+-- -----------------------------------------------------
 CREATE TABLE `indicator_values` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `bot_id` INT UNSIGNED NOT NULL,
@@ -100,4 +119,6 @@ CREATE TABLE `indicator_values` (
   UNIQUE KEY `unique_indicator` (`bot_id`, `symbol`, `timeframe`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

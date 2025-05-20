@@ -6,11 +6,11 @@ const sequelize = new Sequelize(
   process.env.MYSQL_PASSWORD,
   {
     host: process.env.MYSQL_HOST,
-    port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306, // default MySQL port
+    port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
     dialect: 'mysql',
-    logging: false, // disable logging; set to console.log to debug
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
     define: {
-      freezeTableName: true, // optional: prevents plural table names
+      freezeTableName: true,
     },
     pool: {
       max: 10,
@@ -21,7 +21,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Optional: test DB connection at startup
 async function testConnection() {
   try {
     await sequelize.authenticate();
@@ -32,6 +31,4 @@ async function testConnection() {
   }
 }
 
-testConnection();
-
-module.exports = sequelize;
+module.exports = { sequelize, testConnection };
