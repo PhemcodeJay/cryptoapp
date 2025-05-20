@@ -2,16 +2,20 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-// Request a nonce message for wallet login
+// Page rendering routes
+router.get('/', (req, res) => res.render('index'));
+router.get('/login', (req, res) => res.render('LoginPage'));
+router.get('/register', (req, res) => res.render('RegisterPage'));
+router.get('/dashboard', (req, res) => res.render('DashboardPage'));
+router.get('/portfolio', (req, res) => res.render('PortfolioPage'));
+router.get('/bot-config', (req, res) => res.render('BotConfigPage'));
+
+// Wallet connect / auth routes
 router.post('/request-nonce', authController.requestNonce);
-
-// Verify signed message and login (connect wallet)
 router.post('/connect-wallet', authController.verifySignature);
-
-// Logout (disconnect wallet)
 router.post('/logout', authController.logout);
 
-// Optional: You can add getUserByWallet later if implemented
+// Optional: future route for getting user by wallet address
 // router.get('/user/:walletAddress', authController.getUserByWallet);
 
 module.exports = router;
