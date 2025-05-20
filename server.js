@@ -32,7 +32,7 @@ app.use(cors({
 app.use(passport.initialize());
 app.use(flash());
 
-// Apply rate limiting
+// Apply rate limiting & error logger early
 app.use(apiLimiter);
 app.use(errorLogger);
 
@@ -41,14 +41,17 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/wallets', walletRoutes);
 app.use('/api/bot', botRoutes);
 
-// Static files and SPA fallback
-const clientDistPath = path.join(__dirname, 'client', 'dist');
+// Serve React SPA static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(clientDistPath));
-  
-  // Handle SPA routing in production
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  app.use(express.static(clientBuildPath));
+
+  // SPA fallback: serve index.html for client routes (React Router)
+  app.get([
+    '/', '/login', '/register', '/dashboard', '/portfolio',
+    '/bot-config', '/wallet-connect', '/trading-bot', '/logout'
+  ], (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
 
@@ -57,7 +60,7 @@ const PORT = process.env.PORT || 3001;
 const startServer = async () => {
   try {
     await testConnection();
-    await sequelize.sync({ alter: true }); // Use alter for dev, remove for production
+    await sequelize.sync({ alter: true }); // Use alter for dev only
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
@@ -70,7 +73,7 @@ const startServer = async () => {
 
 startServer();
 
-// Error handling middleware (add at the end after all routes)
+// Global error handler (after all routes)
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
