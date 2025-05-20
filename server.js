@@ -2,18 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const walletRoutes = require('./routes/walletRoutes');
-const botRoutes = require('./routes/botRoutes');
+const authRoutes = require('../routes/authRoutes');
+const walletRoutes = require('../routes/walletRoutes');
+const botRoutes = require('../routes/botRoutes');
 const sequelize = require('./sequelize');
 const passport = require('passport');
-const initializeJwtStrategy = require('./middleware/passportJwtStrategy');
+const initializeJwtStrategy = require('../middleware/passportJwtStrategy');
 const flash = require('connect-flash');
 const { testConnection, syncModels, closeAllConnections, getTenantDb } = require('./config/db'); // Import functions from db.js
-const rateLimiter = require('./middleware/rateLimiter');
-const tenantMiddleware = require('./middleware/tenantMiddleware');
-const authenticateUser = require('./middleware/authenticateUser');
-const errorLogger = require('./middleware/errorLogger');
+const rateLimiter = require('../middleware/rateLimiter');
+const tenantMiddleware = require('../middleware/tenantMiddleware');
+const authenticateUser = require('../middleware/authenticateUser');
+const errorLogger = require('../middleware/errorLogger');
 
 const app = express();
 app.use(express.json());

@@ -1,0 +1,28 @@
+{
+  "name": "cryptoapp",
+  "version": "1.0.0",
+  "description": "Web3-enabled portfolio tracker and a manual/auto crypto futures trading bot, using Node.js, Express, Sequelize, MySQL, JWT (with secure cookies), React, and Chart.js.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhemcodeJay/cryptoapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PhemcodeJay/cryptoapp/issues"
+  },
+  "homepage": "https://github.com/PhemcodeJay/cryptoapp#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  }
+}

@@ -1,3 +1,4 @@
 node_modules
-.env
-cryptoapp
+.env.production
+.env.staging
+cryptoapp.sql
