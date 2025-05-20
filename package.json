@@ -1,20 +1,31 @@
 {
   "name": "cryptoapp",
   "version": "1.0.0",
-  "description": "Web3-enabled portfolio tracker and a manual/auto crypto futures trading bot, using Node.js, Express, Sequelize, MySQL, JWT (with secure cookies), React, and Chart.js.",
+  "description": "Web3-enabled portfolio tracker and trading bot with Node.js, Express, React, and blockchain integration",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev:server": "nodemon server.js",
+    "dev:client": "cd client && npm run dev",
+    "dev:fullstack": "concurrently -n \"BACKEND,FRONTEND\" -c \"bgGreen.bold,bgBlue.bold\" \"npm run dev:server\" \"npm run dev:client\"",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint .",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PhemcodeJay/cryptoapp.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "crypto",
+    "blockchain",
+    "trading-bot",
+    "web3",
+    "defi"
+  ],
+  "author": "PhemcodeJay",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/PhemcodeJay/cryptoapp/issues"
   },
@@ -22,33 +33,36 @@
   "dependencies": {
     "@web3-react/core": "^8.2.3",
     "@web3-react/injected-connector": "^6.0.7",
-    "axios": "^1.9.0",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "chart.js": "^4.4.9",
-    "chartjs-adapter-date-fns": "^3.0.0",
-    "chartjs-chart-financial": "^0.2.1",
-    "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.7",
+    "axios": "^1.6.7",
+    "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.0",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "debug": "^4.4.1",
-    "dotenv": "^16.5.0",
-    "ethers": "^6.14.1",
-    "express": "^5.1.0",
-    "express-rate-limit": "^7.5.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.7.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.8.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.1",
+    "mysql2": "^3.6.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "react": "^18.3.1",
-    "react-chartjs-2": "^5.3.0",
-    "sequelize": "^6.37.7",
-    "winston": "^3.17.0"
+    "react-chartjs-2": "^5.2.0",
+    "sequelize": "^6.37.0",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "concurrently": "^9.1.2",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.7"
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-react": "^7.33.2",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

@@ -1,51 +1,79 @@
 require('dotenv').config();
-
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const passport = require('passport');
 const flash = require('connect-flash');
+const path = require('path');
 
-const { sequelize, testConnection } = require('./server/config/db'); // import sequelize instance & testConnection
-const { apiLimiter, authLimiter } = require('./server/middleware/rateLimiter'); // destructure middlewares
+const { sequelize, testConnection } = require('./server/config/db');
+const { apiLimiter, authLimiter } = require('./server/middleware/rateLimiter');
 const errorLogger = require('./server/middleware/errorLogger');
-
 const initializeJwtStrategy = require('./server/middleware/passportJwtStrategy');
+
+// Initialize passport strategies
 initializeJwtStrategy(passport);
 
+// Route imports
 const authRoutes = require('./server/routes/authRoutes');
 const walletRoutes = require('./server/routes/walletRoutes');
 const botRoutes = require('./server/routes/botRoutes');
 
 const app = express();
 
+// Middleware configuration
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
 }));
 app.use(passport.initialize());
 app.use(flash());
 
-app.use(apiLimiter);        // Apply global API rate limiting
-app.use(errorLogger);       // Global error logging
+// Apply rate limiting
+app.use(apiLimiter);
+app.use(errorLogger);
 
-app.use('/api/auth', authLimiter, authRoutes);    // More strict limiter for auth routes
+// API Routes
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/wallets', walletRoutes);
 app.use('/api/bot', botRoutes);
 
-const PORT = process.env.PORT || 3001;
+// Static files and SPA fallback
+const clientDistPath = path.join(__dirname, 'client', 'dist');
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(clientDistPath));
+  
+  // Handle SPA routing in production
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
-(async () => {
+// Database connection and server start
+const PORT = process.env.PORT || 3001;
+const startServer = async () => {
   try {
     await testConnection();
-    await sequelize.sync(); // or your syncModels() if you prefer
+    await sequelize.sync({ alter: true }); // Use alter for dev, remove for production
     app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error('Server startup error:', err);
     process.exit(1);
   }
-})();
+};
+
+startServer();
+
+// Error handling middleware (add at the end after all routes)
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+module.exports = app;
