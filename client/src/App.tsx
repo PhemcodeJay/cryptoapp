@@ -6,11 +6,15 @@ import viteLogo from '/vite.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import IndexPage from './pages/index';
+
+import IndexPage from './pages/index'; // Make sure this file exists
 import WalletConnectPage from './pages/WalletConnectPage';
 import DashboardPage from './pages/DashboardPage';
 import TradingBotPage from './pages/TradingBotPage';
+import BotConfigPage from './pages/BotConfigPage';
 import LogoutPage from './pages/LogoutPage';
+
+
 
 function App() {
   const [count, setCount] = useState(0);
@@ -44,6 +48,7 @@ function App() {
         <Route path="/wallet-connect" element={<WalletConnectPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/trading-bot" element={<TradingBotPage />} />
+        <Route path="/bot-config" element={<BotConfigPage />} />
         <Route path="/logout" element={<LogoutPage />} />
       </Routes>
     </BrowserRouter>

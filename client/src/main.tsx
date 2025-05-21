@@ -7,6 +7,7 @@ import IndexPage from './pages/index'; // Make sure this file exists
 import WalletConnectPage from './pages/WalletConnectPage';
 import DashboardPage from './pages/DashboardPage';
 import TradingBotPage from './pages/TradingBotPage';
+import BotConfigPage from './pages/BotConfigPage';
 import LogoutPage from './pages/LogoutPage';
 
 const root = document.getElementById('root');
@@ -19,7 +20,8 @@ ReactDOM.createRoot(root).render(
         <Route path="/" element={<IndexPage />} />
         <Route path="/wallet-connect" element={<WalletConnectPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/bot" element={<TradingBotPage />} />
+        <Route path="/trading-bot" element={<TradingBotPage />} />
+        <Route path="/bot-config" element={<BotConfigPage />} />
         <Route path="/logout" element={<LogoutPage />} />
       </Routes>
     </BrowserRouter>
