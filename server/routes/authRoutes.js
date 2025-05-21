@@ -9,6 +9,7 @@ router.get('/register', (req, res) => res.render('RegisterPage'));
 router.get('/dashboard', (req, res) => res.render('DashboardPage'));
 router.get('/portfolio', (req, res) => res.render('PortfolioPage'));
 router.get('/bot-config', (req, res) => res.render('BotConfigPage'));
+router.get('/trading-bot', (req, res) => res.render('TradingBotPage'));
 
 // Wallet connect / auth routes
 router.post('/request-nonce', authController.requestNonce);
