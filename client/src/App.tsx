@@ -11,7 +11,7 @@ import IndexPage from './pages/index'; // Make sure this file exists
 import WalletConnectPage from './pages/WalletConnectPage';
 import DashboardPage from './pages/DashboardPage';
 import TradingBotPage from './pages/TradingBotPage';
-import BotConfigPage from './pages/BotConfigPage';
+import AssetsAnalysisPage from './pages/AssetsAnalysisPage';
 import LogoutPage from './pages/LogoutPage';
 
 
@@ -48,7 +48,7 @@ function App() {
         <Route path="/wallet-connect" element={<WalletConnectPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/trading-bot" element={<TradingBotPage />} />
-        <Route path="/bot-config" element={<BotConfigPage />} />
+        <Route path="/assets-analysis" element={<AssetsAnalysisPage />} />
         <Route path="/logout" element={<LogoutPage />} />
       </Routes>
     </BrowserRouter>

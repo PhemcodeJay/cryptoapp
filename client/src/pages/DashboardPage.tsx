@@ -86,6 +86,9 @@ const DashboardPage: React.FC = () => {
           <Link to="/trading-bot" className="btn btn-outline-primary">
             🤖 Trading Bot
           </Link>
+          <Link to="/assets-analysis" className="btn btn-outline-primary">
+            🤖 Assets Analysis
+          </Link>
           <Link to="/logout" className="btn btn-outline-danger">
             🚪 Logout
           </Link>

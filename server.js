@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === 'production') {
   // SPA fallback: serve index.html for client routes (React Router)
   app.get([
     '/', '/login', '/register', '/dashboard', '/portfolio',
-    '/bot-config', '/wallet-connect', '/trading-bot', '/logout'
+    '/assets-analysis', '/wallet-connect', '/trading-bot', '/logout'
   ], (req, res) => {
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });

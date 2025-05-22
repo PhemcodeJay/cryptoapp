@@ -23,6 +23,12 @@ function NavigationButtons() {
         🤖 Trading Bot
       </Link>
       <Link
+        to="/assets-analysis"
+        className="btn btn-primary btn-lg fw-semibold shadow-sm"
+      >
+        🤖 Assets Analysis
+      </Link>
+      <Link
         to="/logout"
         className="btn btn-danger btn-lg fw-semibold shadow-sm"
       >
@@ -37,6 +43,8 @@ const IndexPage: React.FC = () => {
     <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-dark text-light p-4">
       <div className="text-center mb-5">
         <h1 className="display-4 fw-bold mb-3">🚀 Welcome to CryptoPilot</h1>
+        <h1>Web3 Wallet Portfolio Tracker</h1>
+        <p className="lead">Track your assets & configure auto/manual trading bots.</p>
         <p className="lead mx-auto" style={{ maxWidth: '600px' }}>
           Your all-in-one platform to monitor your crypto portfolio, run intelligent trading bots,
           and connect seamlessly with Web3 wallets like MetaMask or Trust Wallet.

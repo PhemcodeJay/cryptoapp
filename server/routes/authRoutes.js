@@ -8,7 +8,7 @@ router.get('/login', (req, res) => res.render('LoginPage'));
 router.get('/register', (req, res) => res.render('RegisterPage'));
 router.get('/dashboard', (req, res) => res.render('DashboardPage'));
 router.get('/portfolio', (req, res) => res.render('PortfolioPage'));
-router.get('/bot-config', (req, res) => res.render('BotConfigPage'));
+router.get('/assets-analysis', (req, res) => res.render('AssetsAnalysisPage'));
 router.get('/trading-bot', (req, res) => res.render('TradingBotPage'));
 
 // Wallet connect / auth routes

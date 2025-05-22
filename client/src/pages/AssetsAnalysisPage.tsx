@@ -8,9 +8,11 @@ const BotConfigPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Trading Bot Configuration</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Assets Analysis</h1>
 
         <div className="space-y-6">
+
+          
 
           {/* Strategy Select */}
           <div>
