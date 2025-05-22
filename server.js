@@ -55,6 +55,20 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+const { exec } = require("child_process");
+
+app.post("/api/run-bot", (req, res) => {
+  const { strategy, asset, address, signature } = req.body;
+
+  // Validate the wallet signature here (future improvement)
+
+  exec(`python3 bot.py --strategy ${strategy} --asset ${asset} --wallet ${address}`, (err, stdout, stderr) => {
+    if (err) return res.status(500).json({ message: stderr });
+    res.json({ message: stdout || "Bot executed" });
+  });
+});
+
+
 // Database connection and server start
 const PORT = process.env.PORT || 3001;
 const startServer = async () => {
