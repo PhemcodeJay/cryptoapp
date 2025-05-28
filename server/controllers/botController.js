@@ -1,6 +1,6 @@
 // controllers/botController.js
 
-const botService = require('../services/botService');
+const botTrader = require('../services/botTrader');
 
 exports.getAnalysis = async (req, res) => {
   const { symbol } = req.query;
@@ -10,8 +10,8 @@ exports.getAnalysis = async (req, res) => {
   }
 
   try {
-    // Call the analyze method from botService
-    const data = await botService.analyze(symbol);
+    // Call the analyze method from botTrader
+    const data = await botTrader.analyze(symbol);
 
     // Return the results as JSON
     res.json(data);

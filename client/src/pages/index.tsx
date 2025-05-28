@@ -3,34 +3,35 @@ import { Link } from 'react-router-dom';
 
 function NavigationButtons() {
   return (
-    <div className="d-flex gap-3 mb-5 flex-wrap justify-content-center">
+    <div className="flex flex-wrap justify-center gap-4 mb-10">
       <Link
         to="/wallet-connect"
-        className="btn btn-warning btn-lg text-dark fw-semibold shadow-sm"
+        className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
       >
         🔐 Connect Wallet
       </Link>
       <Link
         to="/dashboard"
-        className="btn btn-success btn-lg fw-semibold shadow-sm"
+        className="bg-green-500 hover:bg-green-400 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
       >
         📊 View Dashboard
       </Link>
       <Link
         to="/trading-bot"
-        className="btn btn-primary btn-lg fw-semibold shadow-sm"
+        className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
       >
         🤖 Trading Bot
       </Link>
-      <Link
+<Link
         to="/assets-analysis"
-        className="btn btn-primary btn-lg fw-semibold shadow-sm"
+        className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
       >
         🤖 Assets Analysis
       </Link>
+
       <Link
         to="/logout"
-        className="btn btn-danger btn-lg fw-semibold shadow-sm"
+        className="bg-red-500 hover:bg-red-400 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
       >
         🚪 Logout
       </Link>
@@ -40,41 +41,25 @@ function NavigationButtons() {
 
 const IndexPage: React.FC = () => {
   return (
-    <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-dark text-light p-4">
-      <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold mb-3">🚀 Welcome to CryptoPilot</h1>
-        <h1>Web3 Wallet Portfolio Tracker</h1>
-        <p className="lead">Track your assets & configure auto/manual trading bots.</p>
-        <p className="lead mx-auto" style={{ maxWidth: '600px' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex flex-col items-center justify-center p-6">
+      <div className="text-center max-w-2xl mb-10">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">🚀 Welcome to CryptoPilot</h1>
+        <p className="text-lg text-gray-300">
           Your all-in-one platform to monitor your crypto portfolio, run intelligent trading bots,
           and connect seamlessly with Web3 wallets like MetaMask or Trust Wallet.
         </p>
       </div>
 
-      {/* Navigation Buttons inserted here */}
       <NavigationButtons />
 
-      <div
-        className="card bg-secondary bg-opacity-25 text-light shadow-lg"
-        style={{ maxWidth: '600px' }}
-      >
-        <div className="card-body">
-          <h2 className="card-title fw-bold mb-3">💡 Why CryptoPilot?</h2>
-          <ul className="list-group list-group-flush">
-            <li className="list-group-item bg-transparent text-light border-0 ps-0">
-              🔎 Real-time crypto tracking with price alerts
-            </li>
-            <li className="list-group-item bg-transparent text-light border-0 ps-0">
-              🤖 Automated trading bot with configurable strategies
-            </li>
-            <li className="list-group-item bg-transparent text-light border-0 ps-0">
-              🔗 Secure wallet connection using MetaMask or Trust Wallet
-            </li>
-            <li className="list-group-item bg-transparent text-light border-0 ps-0">
-              📈 Visual analytics to help you trade smarter
-            </li>
-          </ul>
-        </div>
+      <div className="bg-white/5 border border-white/10 rounded-2xl shadow-xl max-w-xl w-full p-6">
+        <h2 className="text-2xl font-bold mb-4">💡 Why CryptoPilot?</h2>
+        <ul className="space-y-2 text-gray-200">
+          <li>🔎 Real-time crypto tracking with price alerts</li>
+          <li>🤖 Automated trading bot with configurable strategies</li>
+          <li>🔗 Secure wallet connection using MetaMask or Trust Wallet</li>
+          <li>📈 Visual analytics to help you trade smarter</li>
+        </ul>
       </div>
     </div>
   );

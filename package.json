@@ -1,5 +1,5 @@
 {
-  "name": "cryptoapp",
+  "name": "cryptopilot",
   "version": "1.0.0",
   "description": "Web3-enabled portfolio tracker and trading bot with Node.js, Express, React, and blockchain integration",
   "main": "server.js",
@@ -37,6 +37,8 @@
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.6",
     "chart.js": "^4.4.9",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-chart-financial": "^0.2.1",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

@@ -1,6 +1,5 @@
 -- -----------------------------------------------------
 -- Schema for Web3 Crypto Trading App (Wallet Connect Users)
--- -----------------------------------------------------
 -- MySQL version: 8+
 -- Charset: utf8mb4
 -- Collation: utf8mb4_general_ci
@@ -62,7 +61,8 @@ CREATE TABLE `bots` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_bot_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
@@ -81,7 +81,8 @@ CREATE TABLE `bot_trades` (
   `opened_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `closed_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_trade_bot`
+    FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
@@ -95,8 +96,9 @@ CREATE TABLE `bot_signals` (
   `confidence` DECIMAL(5,2) DEFAULT NULL,
   `generated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE,
-  INDEX (`symbol`, `generated_at`)
+  CONSTRAINT `fk_signal_bot`
+    FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE,
+  INDEX `idx_signal_symbol_time` (`symbol`, `generated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
@@ -115,8 +117,46 @@ CREATE TABLE `indicator_values` (
   `stoch_rsi` DECIMAL(8,4) DEFAULT NULL,
   `volume` DECIMAL(18,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_indicator_bot`
+    FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE,
   UNIQUE KEY `unique_indicator` (`bot_id`, `symbol`, `timeframe`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
+-- Table `wallet_balance`
+-- -----------------------------------------------------
+CREATE TABLE `wallet_balance` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `wallet_id` INT UNSIGNED NOT NULL,
+  `symbol` VARCHAR(50) NOT NULL,
+  `balance` DECIMAL(36,18) NOT NULL DEFAULT 0,
+  `price` DECIMAL(18,8) NOT NULL DEFAULT 0,
+  `value` DECIMAL(36,8) GENERATED ALWAYS AS (`balance` * `price`) STORED,
+  `asset_class` VARCHAR(50),
+  `change_24h` DECIMAL(8,4),
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_balance_wallet`
+    FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`) ON DELETE CASCADE,
+  INDEX `idx_wallet_symbol` (`wallet_id`, `symbol`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
+-- Table `wallet_transactions`
+-- -----------------------------------------------------
+CREATE TABLE `wallet_transactions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `wallet_id` INT UNSIGNED NOT NULL,
+  `symbol` VARCHAR(50) NOT NULL,
+  `amount` DECIMAL(36,18) NOT NULL DEFAULT 0,
+  `price` DECIMAL(18,8) NOT NULL DEFAULT 0,
+  `transaction_type` ENUM('deposit', 'withdrawal') NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_transaction_wallet`
+    FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`) ON DELETE CASCADE,
+  INDEX `idx_wallet_symbol_tx` (`wallet_id`, `symbol`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

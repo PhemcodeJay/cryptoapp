@@ -1,250 +1,156 @@
-import React, { useState } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, TimeScale, Tooltip, Legend, Title } from 'chart.js';
+import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
+import { Chart } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
+  TimeScale,
   Tooltip,
   Legend,
-  Filler
+  Title,
+  CandlestickController,
+  CandlestickElement
 );
 
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'wallet' | 'bot'>('wallet');
-  const [botStatus, setBotStatus] = useState<'active' | 'paused'>('paused');
-  const [riskLevel, setRiskLevel] = useState<number>(3);
+  const [walletSummary, setWalletSummary] = useState<any>(null);
+  const [candlestickData, setCandlestickData] = useState<any[]>([]);
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
 
-  const walletData = {
-    balance: 12453.87,
-    profitLoss: 1245.32,
-    assets: [
-      { symbol: 'BTC', value: 8230.45, change: 5.2 },
-      { symbol: 'ETH', value: 3120.23, change: -1.8 },
-      { symbol: 'SOL', value: 1103.19, change: 12.4 },
-    ],
+  const syncWallet = async () => {
+    try {
+      const res = await fetch('/api/wallet/sync', { method: 'POST' });
+      if (res.ok) {
+        setLastSynced(new Date());
+      }
+    } catch (err) {
+      console.error('Wallet sync failed', err);
+    }
   };
+
+  const fetchSummary = async () => {
+    try {
+      const res = await fetch('/api/wallet/summary');
+      const data = await res.json();
+      setWalletSummary(data);
+    } catch (err) {
+      console.error('Failed to fetch wallet summary', err);
+    }
+  };
+
+  const fetchChartData = async () => {
+    try {
+      const res = await fetch('/api/wallet/candlestick');
+      const data = await res.json();
+      setCandlestickData(data);
+    } catch (err) {
+      console.error('Failed to load candlestick chart', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+    fetchChartData();
+    const interval = setInterval(() => {
+      syncWallet();
+      fetchSummary();
+    }, 30000); // refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const breakdownByAssetClass = walletSummary?.assetClasses || [];
 
   const chartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
       {
-        label: 'Portfolio Value',
-        data: [5000, 7000, 8500, 9200, 11000, 12453],
-        borderColor: 'rgba(34, 197, 94, 1)',
-        backgroundColor: 'rgba(34, 197, 94, 0.2)',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
+        label: 'Price',
+        data: candlestickData,
+        type: 'candlestick',
+        borderColor: '#4e73df',
+        borderWidth: 1
+      }
+    ]
   };
 
-  const tradingData = {
-    labels: ['Wins', 'Losses', 'Open'],
-    datasets: [
-      {
-        label: 'Trades',
-        data: [42, 18, 7],
-        backgroundColor: [
-          'rgba(34, 197, 94, 0.9)',
-          'rgba(239, 68, 68, 0.9)',
-          'rgba(107, 114, 128, 0.9)',
-        ],
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true },
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'day' },
+        ticks: { source: 'auto' },
       },
-    ],
+      y: {
+        beginAtZero: false
+      }
+    }
   };
 
   return (
-    <div className="bg-dark text-light min-vh-100 py-4">
-      <div className="container">
-        <h1 className="text-center mb-4 fw-bold">🚀 CryptoPilot Dashboard</h1>
+    <div className="p-4 space-y-6">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
 
-        {/* Navigation Buttons */}
-        <div className="d-flex justify-content-center mb-4 gap-3 flex-wrap">
-          <Link to="/" className="btn btn-outline-light">
-            🏠 Home
-          </Link>
-          <Link to="/wallet-connect" className="btn btn-outline-warning text-dark">
-            🔐 Connect Wallet
-          </Link>
-          <Link to="/trading-bot" className="btn btn-outline-primary">
-            🤖 Trading Bot
-          </Link>
-          <Link to="/assets-analysis" className="btn btn-outline-primary">
-            🤖 Assets Analysis
-          </Link>
-          <Link to="/logout" className="btn btn-outline-danger">
-            🚪 Logout
-          </Link>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-600">
+          Last synced: {lastSynced ? lastSynced.toLocaleTimeString() : 'Never'}
+        </p>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={syncWallet}
+        >
+          Sync Wallet
+        </button>
+      </div>
+
+      {walletSummary && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="font-semibold text-lg">Balance Breakdown</h2>
+            <ul className="mt-2 space-y-1">
+              {breakdownByAssetClass.map((item: any) => (
+                <li key={item.class} className="flex justify-between">
+                  <span>{item.class}</span>
+                  <span>${item.total.toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="font-semibold text-lg">Top Gainers / Losers</h2>
+            <ul className="mt-2 text-sm">
+              {walletSummary.gainers?.map((a: any) => (
+                <li key={a.symbol} className="text-green-600">
+                  +{a.symbol}: {a.changePercent}%
+                </li>
+              ))}
+              {walletSummary.losers?.map((a: any) => (
+                <li key={a.symbol} className="text-red-600">
+                  -{a.symbol}: {a.changePercent}%
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+      )}
 
-        {/* Tabs */}
-        <ul className="nav nav-tabs justify-content-center mb-4">
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === 'wallet' ? 'active' : ''}`}
-              onClick={() => setActiveTab('wallet')}
-            >
-              Wallet Summary
-            </button>
-          </li>
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === 'bot' ? 'active' : ''}`}
-              onClick={() => setActiveTab('bot')}
-            >
-              Bot Settings
-            </button>
-          </li>
-        </ul>
+      <div className="bg-white p-4 rounded shadow">
+        <h2 className="font-semibold text-lg mb-2">Candlestick Chart</h2>
+        <Chart type="candlestick" data={chartData} options={chartOptions} />
+      </div>
 
-        {/* Wallet Summary Tab */}
-        {activeTab === 'wallet' ? (
-          <div className="row g-4">
-            {/* Wallet Overview */}
-            <div className="col-12 col-lg-4">
-              <div className="card text-dark h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title">Wallet Overview</h5>
-                  <div className="d-flex justify-content-between my-3">
-                    <span>Total Balance</span>
-                    <span className="fw-bold text-success fs-4">${walletData.balance.toLocaleString()}</span>
-                  </div>
-                  <div className="d-flex justify-content-between">
-                    <span>Profit/Loss</span>
-                    <span className={`fs-5 fw-semibold ${walletData.profitLoss >= 0 ? 'text-success' : 'text-danger'}`}>
-                      {walletData.profitLoss >= 0 ? '+' : ''}
-                      {walletData.profitLoss.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Asset Breakdown */}
-            <div className="col-12 col-lg-4">
-              <div className="card text-dark h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title mb-3">Asset Breakdown</h5>
-                  <ul className="list-group list-group-flush">
-                    {walletData.assets.map((asset) => (
-                      <li
-                        key={asset.symbol}
-                        className="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: 32, height: 32 }}>
-                            {asset.symbol}
-                          </div>
-                          <span>{asset.symbol}</span>
-                        </div>
-                        <div className="text-end">
-                          <div className="fw-semibold">${asset.value.toLocaleString()}</div>
-                          <div className={asset.change >= 0 ? 'text-success' : 'text-danger'}>
-                            {asset.change >= 0 ? '+' : ''}
-                            {asset.change}%
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Portfolio Growth Chart */}
-            <div className="col-12 col-lg-4">
-              <div className="card text-dark h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title mb-3">📈 Portfolio Growth</h5>
-                  <div style={{ height: '250px' }}>
-                    <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // Bot Settings Tab
-          <div className="row g-4">
-            <div className="col-12 col-lg-6">
-              <div className="card text-dark h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title mb-4">⚙️ Bot Controls</h5>
-
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span>Bot Status</span>
-                    <div className="d-flex align-items-center gap-2">
-                      <div
-                        className={`rounded-circle ${
-                          botStatus === 'active' ? 'bg-success' : 'bg-warning'
-                        }`}
-                        style={{ width: 12, height: 12 }}
-                      ></div>
-                      <span className="text-capitalize fw-semibold">{botStatus}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setBotStatus(botStatus === 'active' ? 'paused' : 'active')}
-                    className={`btn w-100 mb-4 ${
-                      botStatus === 'active' ? 'btn-danger' : 'btn-success'
-                    }`}
-                  >
-                    {botStatus === 'active' ? 'Pause Bot' : 'Activate Bot'}
-                  </button>
-
-                  <div>
-                    <label htmlFor="riskLevel" className="form-label d-flex justify-content-between">
-                      <span>Risk Level</span>
-                      <span>{riskLevel}/5</span>
-                    </label>
-                    <input
-                      type="range"
-                      className="form-range"
-                      min={1}
-                      max={5}
-                      value={riskLevel}
-                      onChange={(e) => setRiskLevel(parseInt(e.target.value))}
-                      id="riskLevel"
-                    />
-                    <div className="d-flex justify-content-between small text-muted">
-                      <span>Low</span>
-                      <span>High</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-lg-6">
-              <div className="card text-dark h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title mb-3">📊 Bot Performance</h5>
-                  <div style={{ height: '250px' }}>
-                    <Bar data={tradingData} options={{ responsive: true, maintainAspectRatio: false }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="mt-6 text-center">
+        <Link to="/portfolio" className="text-blue-500 hover:underline">
+          View Full Portfolio
+        </Link>
       </div>
     </div>
   );
