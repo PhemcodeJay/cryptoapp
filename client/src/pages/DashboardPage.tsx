@@ -9,11 +9,12 @@ import {
   Legend,
   Title,
 } from 'chart.js';
+import type { ChartOptions } from 'chart.js';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
-// Register necessary ChartJS components including financial charts
+// Register Chart.js components including financial chart elements
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,13 +26,11 @@ ChartJS.register(
   CandlestickElement
 );
 
-// Asset type for gainers/losers
 interface Asset {
   symbol: string;
   changePercent: number;
 }
 
-// Wallet summary response type (partial)
 interface WalletSummary {
   assetClasses?: { class: string; total: number }[];
   gainers?: Asset[];
@@ -64,11 +63,10 @@ const DashboardPage: React.FC = () => {
       const res = await fetch(`/api/wallet/candlestick?symbol=${asset}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
-      // Expecting data as array of { x, o, h, l, c }
       setCandlestickData(data);
     } catch (err) {
       console.error('Candlestick fetch failed:', err);
-      setCandlestickData([]); // Clear on error
+      setCandlestickData([]);
     }
   };
 
@@ -83,7 +81,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Effect: fetch data on mount and whenever selectedAsset changes
+  // Fetch data on mount and whenever selectedAsset changes
   useEffect(() => {
     fetchWalletSummary();
     fetchCandlestickData(selectedAsset);
@@ -110,7 +108,7 @@ const DashboardPage: React.FC = () => {
     ],
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'candlestick'> = {
     responsive: true,
     plugins: {
       legend: { display: false },
@@ -120,8 +118,8 @@ const DashboardPage: React.FC = () => {
     scales: {
       x: {
         type: 'timeseries' as const,
-        time: { unit: 'hour' },
-        ticks: { source: 'auto' as 'auto' }, // Explicitly type as literal
+        time: { unit: 'hour' as const },
+        ticks: { source: 'auto' as const },
       },
       y: {
         beginAtZero: false,
