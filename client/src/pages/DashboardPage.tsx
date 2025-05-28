@@ -14,7 +14,7 @@ import { CandlestickController, CandlestickElement } from 'chartjs-chart-financi
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
-// Register Chart.js components including financial chart elements
+// Chart.js registration
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -26,6 +26,7 @@ ChartJS.register(
   CandlestickElement
 );
 
+// Types
 interface Asset {
   symbol: string;
   changePercent: number;
@@ -45,7 +46,7 @@ const DashboardPage: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('BTCUSDT');
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
 
-  // Fetch wallet summary
+  // Fetch wallet summary from backend
   const fetchWalletSummary = async () => {
     try {
       const res = await fetch('/api/wallet/summary');
@@ -57,7 +58,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Fetch candlestick data for selected asset
+  // Fetch candlestick data for a specific asset
   const fetchCandlestickData = async (asset: string) => {
     try {
       const res = await fetch(`/api/wallet/candlestick?symbol=${asset}`);
@@ -65,12 +66,12 @@ const DashboardPage: React.FC = () => {
       const data = await res.json();
       setCandlestickData(data);
     } catch (err) {
-      console.error('Candlestick fetch failed:', err);
+      console.error('Failed to fetch candlestick data:', err);
       setCandlestickData([]);
     }
   };
 
-  // Sync wallet data
+  // Sync wallet
   const syncWallet = async () => {
     try {
       const res = await fetch('/api/wallet/sync', { method: 'POST' });
@@ -81,7 +82,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Fetch data on mount and whenever selectedAsset changes
+  // Initial and periodic data loading
   useEffect(() => {
     fetchWalletSummary();
     fetchCandlestickData(selectedAsset);
@@ -95,7 +96,7 @@ const DashboardPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [selectedAsset]);
 
-  // Chart.js data and options
+  // Chart config
   const chartData = {
     datasets: [
       {
@@ -118,8 +119,8 @@ const DashboardPage: React.FC = () => {
     scales: {
       x: {
         type: 'timeseries' as const,
-        time: { unit: 'hour' as const },
-        ticks: { source: 'auto' as const },
+        time: { unit: 'hour' },
+        ticks: { source: 'auto' },
       },
       y: {
         beginAtZero: false,
@@ -128,7 +129,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">📊 Dashboard</h1>
         <button
@@ -140,12 +141,12 @@ const DashboardPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600">
         Last synced: {lastSynced ? lastSynced.toLocaleTimeString() : 'Never'}
-      </div>
+      </p>
 
-      <div className="flex gap-4 items-center">
-        <label htmlFor="asset" className="text-gray-700 font-medium">
+      <div className="flex items-center gap-4">
+        <label htmlFor="asset" className="font-medium text-gray-700">
           Asset:
         </label>
         <select
@@ -167,6 +168,7 @@ const DashboardPage: React.FC = () => {
 
       {walletSummary && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Balance Breakdown */}
           <div className="bg-white rounded shadow p-4">
             <h2 className="text-lg font-semibold mb-2">Balance Breakdown</h2>
             <ul>
@@ -179,6 +181,7 @@ const DashboardPage: React.FC = () => {
             </ul>
           </div>
 
+          {/* Top Movers */}
           <div className="bg-white rounded shadow p-4">
             <h2 className="text-lg font-semibold mb-2">Top Movers</h2>
             <ul className="text-sm space-y-1">
