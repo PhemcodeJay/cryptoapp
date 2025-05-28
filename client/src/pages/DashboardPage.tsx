@@ -87,7 +87,7 @@ const DashboardPage: React.FC = () => {
     },
     scales: {
       x: {
-        type: 'time',
+        type: 'timeseries',
         time: { unit: 'hour' },
         ticks: { source: 'auto' },
       },

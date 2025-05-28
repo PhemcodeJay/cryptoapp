@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Chart as ChartJS, TimeScale, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
+import {
+  Chart as ChartJS,
+  TimeScale,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -14,19 +22,39 @@ ChartJS.register(
   CandlestickElement
 );
 
+type Signal = {
+  type: 'buy' | 'sell';
+  time: number; // timestamp in ms
+  price: number;
+};
+
+type Candle = {
+  x: number; // timestamp in ms
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+};
+
 const AssetsAnalysisPage: React.FC = () => {
-  const [symbol, setSymbol] = useState('BTCUSDT');
-  const [candles, setCandles] = useState<any[]>([]);
-  const [signals, setSignals] = useState<any[]>([]);
+  const [symbol, setSymbol] = useState<string>('BTCUSDT');
+  const [candles, setCandles] = useState<Candle[]>([]);
+  const [signals, setSignals] = useState<Signal[]>([]);
 
   const fetchChartData = async () => {
     try {
       const res = await fetch(`/api/trade/candlestick?symbol=${symbol}`);
       const data = await res.json();
-      setCandles(data.candles);
-      setSignals(data.signals); // { type: 'buy'|'sell', time: timestamp, price: number }
+      // Ensure all x values are numbers (timestamps)
+      setCandles(
+        data.candles.map((c: any) => ({
+          ...c,
+          x: typeof c.x === 'number' ? c.x : new Date(c.x).getTime(),
+        }))
+      );
+      setSignals(data.signals);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch chart data:', err);
     }
   };
 
@@ -36,42 +64,42 @@ const AssetsAnalysisPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [symbol]);
 
-  const chartData = {
+  const chartData: ChartData<'candlestick' | 'scatter'> = {
     datasets: [
       {
         label: symbol,
         data: candles,
         type: 'candlestick',
         borderColor: '#4e73df',
-        borderWidth: 1
+        borderWidth: 1,
       },
-      ...signals.map((s: any) => ({
-        type: 'scatter',
+      ...signals.map((s) => ({
+        type: 'scatter' as const,
         label: `${s.type.toUpperCase()} Signal`,
         data: [{ x: s.time, y: s.price }],
         backgroundColor: s.type === 'buy' ? 'green' : 'red',
         pointRadius: 6,
-        pointStyle: s.type === 'buy' ? 'triangle' : 'rectRot'
-      }))
-    ]
+        pointStyle: s.type === 'buy' ? 'triangle' : 'rectRot',
+      })),
+    ],
   };
 
-  const options = {
+  const options: ChartOptions<'candlestick' | 'scatter'> = {
     responsive: true,
     plugins: {
       legend: { display: true },
-      tooltip: { enabled: true }
+      tooltip: { enabled: true },
     },
     scales: {
       x: {
-        type: 'time',
+        type: 'timeseries',
         time: { unit: 'minute' },
-        ticks: { source: 'auto' }
+        ticks: { source: 'auto' },
       },
       y: {
-        beginAtZero: false
-      }
-    }
+        beginAtZero: false,
+      },
+    },
   };
 
   return (

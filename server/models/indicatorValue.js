@@ -7,7 +7,10 @@ const IndicatorValue = sequelize.define('IndicatorValue', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     field: 'bot_id',
-    references: { model: 'bots', key: 'id' },
+    references: {
+      model: 'bots',
+      key: 'id',
+    },
     onDelete: 'CASCADE',
   },
   symbol: {
@@ -48,7 +51,7 @@ const IndicatorValue = sequelize.define('IndicatorValue', {
   volume: {
     type: DataTypes.DECIMAL(18, 4),
     allowNull: true,
-  }
+  },
 }, {
   tableName: 'indicator_values',
   timestamps: false,
@@ -58,11 +61,17 @@ const IndicatorValue = sequelize.define('IndicatorValue', {
       unique: true,
       fields: ['bot_id', 'symbol', 'timeframe', 'timestamp'],
       name: 'unique_indicator',
-    }
+    },
   ],
 });
 
-IndicatorValue.belongsTo(Bot, { foreignKey: 'bot_id', onDelete: 'CASCADE' });
-Bot.hasMany(IndicatorValue, { foreignKey: 'bot_id' });
+// Associations
+IndicatorValue.belongsTo(Bot, {
+  foreignKey: 'bot_id',
+  onDelete: 'CASCADE',
+});
+Bot.hasMany(IndicatorValue, {
+  foreignKey: 'bot_id',
+});
 
 module.exports = IndicatorValue;

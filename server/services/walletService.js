@@ -1,13 +1,15 @@
-// walletService.js
-
 const axios = require('axios');
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY; // Optional if you want BSC support
+const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY; // Optional for BSC support
 
 async function fetchEthWallet(address) {
   if (!address || typeof address !== 'string') {
     console.error('Invalid Ethereum address');
+    return null;
+  }
+  if (!ETHERSCAN_API_KEY) {
+    console.error('ETHERSCAN_API_KEY is not set');
     return null;
   }
   try {
@@ -30,14 +32,13 @@ async function fetchEthWallet(address) {
   }
 }
 
-// Optional: fetch BSC wallet balance using BscScan
 async function fetchBscWallet(address) {
   if (!address || typeof address !== 'string') {
     console.error('Invalid BSC address');
     return null;
   }
   if (!BSCSCAN_API_KEY) {
-    console.error('BSCSCAN_API_KEY not set in environment');
+    console.error('BSCSCAN_API_KEY is not set');
     return null;
   }
   try {
@@ -60,7 +61,25 @@ async function fetchBscWallet(address) {
   }
 }
 
+/**
+ * Fetch wallet balance for given address and chain type
+ * @param {string} address - Wallet address
+ * @param {'eth'|'bsc'} chain - Chain type
+ * @returns {Promise<{balance: number} | null>}
+ */
+async function fetchWallet(address, chain = 'eth') {
+  if (chain === 'eth') {
+    return await fetchEthWallet(address);
+  } else if (chain === 'bsc') {
+    return await fetchBscWallet(address);
+  } else {
+    console.error('Unsupported chain:', chain);
+    return null;
+  }
+}
+
 module.exports = {
   fetchEthWallet,
   fetchBscWallet,
+  fetchWallet,
 };

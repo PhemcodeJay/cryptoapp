@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
-const User = require('./User');
 
 const Wallet = sequelize.define('Wallet', {
   userId: {
@@ -44,7 +43,7 @@ const Wallet = sequelize.define('Wallet', {
     field: 'deleted_at',
   },
 }, {
-  tableName: 'wallets', // or 'wallet_balances' if matching SQL table name
+  tableName: 'wallets',
   timestamps: true,
   paranoid: true,
   underscored: true,
@@ -57,8 +56,5 @@ const Wallet = sequelize.define('Wallet', {
   ],
 });
 
-// Associations
-Wallet.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
-User.hasMany(Wallet, { foreignKey: 'userId' });
-
 module.exports = Wallet;
+

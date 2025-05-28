@@ -7,7 +7,10 @@ const BotTrade = sequelize.define('BotTrade', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     field: 'bot_id',
-    references: { model: 'bots', key: 'id' },
+    references: {
+      model: 'bots',
+      key: 'id',
+    },
     onDelete: 'CASCADE',
   },
   symbol: {
@@ -60,7 +63,12 @@ const BotTrade = sequelize.define('BotTrade', {
 });
 
 // Associations
-BotTrade.belongsTo(Bot, { foreignKey: 'bot_id', onDelete: 'CASCADE' });
-Bot.hasMany(BotTrade, { foreignKey: 'bot_id' });
+BotTrade.belongsTo(Bot, {
+  foreignKey: 'bot_id',
+  onDelete: 'CASCADE',
+});
+Bot.hasMany(BotTrade, {
+  foreignKey: 'bot_id',
+});
 
 module.exports = BotTrade;

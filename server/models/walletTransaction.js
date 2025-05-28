@@ -7,7 +7,10 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     field: 'wallet_id',
-    references: { model: 'wallets', key: 'id' },
+    references: {
+      model: 'wallets',
+      key: 'id',
+    },
     onDelete: 'CASCADE',
   },
   txHash: {
@@ -22,7 +25,7 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
     allowNull: false,
   },
   amount: {
-    type: DataTypes.DECIMAL(36, 18), // large precision for crypto amounts
+    type: DataTypes.DECIMAL(36, 18),
     allowNull: false,
   },
   symbol: {
@@ -44,7 +47,7 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
     type: DataTypes.JSON,
     allowNull: true,
     comment: 'Additional transaction details in JSON format',
-  }
+  },
 }, {
   tableName: 'wallet_transactions',
   timestamps: false,
@@ -57,7 +60,12 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
 });
 
 // Associations
-WalletTransaction.belongsTo(Wallet, { foreignKey: 'wallet_id', onDelete: 'CASCADE' });
-Wallet.hasMany(WalletTransaction, { foreignKey: 'wallet_id' });
+WalletTransaction.belongsTo(Wallet, {
+  foreignKey: 'wallet_id',
+  onDelete: 'CASCADE',
+});
+Wallet.hasMany(WalletTransaction, {
+  foreignKey: 'wallet_id',
+});
 
 module.exports = WalletTransaction;

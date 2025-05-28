@@ -7,7 +7,10 @@ const Bot = sequelize.define('Bot', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     field: 'user_id',
-    references: { model: 'users', key: 'id' },
+    references: {
+      model: 'users',
+      key: 'id',
+    },
     onDelete: 'CASCADE',
   },
   exchange: {
@@ -64,3 +67,4 @@ Bot.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 User.hasMany(Bot, { foreignKey: 'user_id' });
 
 module.exports = Bot;
+
