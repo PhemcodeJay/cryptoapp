@@ -7,34 +7,31 @@ import {
   TimeScale,
   Tooltip,
   Legend,
-  CandlestickController,
-  BarElement,
   Title,
-  ChartOptions,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
-// Register necessary Chart.js components
+// Import candlestick controller and element from chartjs-chart-financial
+import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
   TimeScale,
   Tooltip,
   Legend,
+  Title,
   CandlestickController,
-  BarElement, // Needed for candlestick to render bars properly
-  Title
+  CandlestickElement
 );
 
-// Define your timeframes
 const timeframes = [
   { label: '4H', value: 0.5 },
   { label: '1D', value: 1 },
   { label: '1W', value: 7 }
 ];
 
-// Define tokens
 const tokens = [
   { id: 'bitcoin', symbol: 'BTC' },
   { id: 'ethereum', symbol: 'ETH' },
@@ -49,33 +46,31 @@ const AssetAnalysisPage: React.FC = () => {
   const fetchTokenData = async () => {
     setLoading(true);
     const updatedData: Record<string, any[]> = {};
+
     await Promise.all(
       tokens.map(async (token) => {
         try {
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/coins/${token.id}/ohlc`,
-            {
-              params: {
-                vs_currency: 'usd',
-                days: selectedTimeframe.value
-              }
-            }
-          );
-          // Format data for candlestick chart
+          const res = await axios.get(`https://api.coingecko.com/api/v3/coins/${token.id}/ohlc`, {
+            params: {
+              vs_currency: 'usd',
+              days: selectedTimeframe.value,
+            },
+          });
           const formatted = res.data.map((d: any) => ({
             x: new Date(d[0]),
             o: d[1],
             h: d[2],
             l: d[3],
-            c: d[4]
+            c: d[4],
           }));
           updatedData[token.symbol] = formatted;
         } catch (e) {
-          console.error(`Error fetching data for ${token.symbol}:`, e);
-          updatedData[token.symbol] = []; // Fallback empty array
+          console.error(`Failed to fetch data for ${token.symbol}`, e);
+          updatedData[token.symbol] = [];
         }
       })
     );
+
     setPriceData(updatedData);
     setLoading(false);
   };
@@ -95,9 +90,7 @@ const AssetAnalysisPage: React.FC = () => {
               key={tf.label}
               onClick={() => setSelectedTimeframe(tf)}
               className={`px-5 py-2 rounded-xl font-semibold transition ${
-                selectedTimeframe.label === tf.label
-                  ? 'bg-blue-600'
-                  : 'bg-gray-700 hover:bg-gray-600'
+                selectedTimeframe.label === tf.label ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
               {tf.label}
@@ -109,10 +102,7 @@ const AssetAnalysisPage: React.FC = () => {
 
         {!loading &&
           tokens.map((token) => (
-            <div
-              key={token.symbol}
-              className="bg-white/5 p-6 rounded-2xl shadow-xl mb-10"
-            >
+            <div key={token.symbol} className="bg-white/5 p-6 rounded-2xl shadow-xl mb-10">
               <h2 className="text-xl font-semibold mb-4">{token.symbol}/USD</h2>
               <Chart
                 type="candlestick"
@@ -125,10 +115,10 @@ const AssetAnalysisPage: React.FC = () => {
                       color: {
                         up: '#16a34a',
                         down: '#dc2626',
-                        unchanged: '#facc15'
-                      }
-                    }
-                  ]
+                        unchanged: '#facc15',
+                      },
+                    },
+                  ],
                 }}
                 options={{
                   responsive: true,
@@ -136,17 +126,20 @@ const AssetAnalysisPage: React.FC = () => {
                     x: {
                       type: 'time',
                       time: {
-                        tooltipFormat: 'MMM dd, HH:mm'
+                        tooltipFormat: 'MMM dd, HH:mm',
                       },
-                      ticks: { color: 'white' }
+                      ticks: { color: 'white' },
                     },
                     y: {
-                      ticks: { color: 'white' }
-                    }
+                      ticks: { color: 'white' },
+                    },
                   },
                   plugins: {
-                    legend: { labels: { color: 'white' } }
-                  }
+                    legend: { labels: { color: 'white' } },
+                    title: {
+                      display: false,
+                    },
+                  },
                 }}
               />
             </div>
