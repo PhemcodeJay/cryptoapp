@@ -26,8 +26,7 @@ exports.getWallets = async (req, res) => {
     res.status(400).json({ error: err.message || 'Failed to get wallets' });
   }
 };
-const { WalletBalance, TradeHistory } = require('../models');
-const axios = require('axios');
+const { WalletBalance } = require('../models');
 
 // Replace with actual wallet fetch logic
 exports.syncFromWalletProvider = async () => {
@@ -93,7 +92,7 @@ const classifyAsset = (symbol) => {
 };
 
 // Mock: Replace with real Web3/wallet API logic
-const fetchWalletData = async (wallet) => {
+const fetchWalletData = async () => {
   // Example asset structure
   return [
     { symbol: 'ETH', amount: 2.5, price: 1800, change24h: 4.5 },
