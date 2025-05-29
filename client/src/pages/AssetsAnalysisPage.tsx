@@ -37,16 +37,19 @@ type Candle = {
   c: number;
 };
 
-type APIResponse = {
-  candles: Candle[];
-  signals: Signal[];
+type APIResponse = Record<'4h' | '1d' | '1w', Candle[]>; // matches backend response structure
+
+const intervalMap: Record<'hourly' | 'daily' | 'weekly', '4h' | '1d' | '1w'> = {
+  hourly: '4h',
+  daily: '1d',
+  weekly: '1w',
 };
 
 const AssetsAnalysisPage: React.FC = () => {
   const [symbol, setSymbol] = useState<string>('BTCUSDT');
   const [interval, setIntervalValue] = useState<'hourly' | 'daily' | 'weekly'>('hourly');
   const [candles, setCandles] = useState<Candle[]>([]);
-  const [signals, setSignals] = useState<Signal[]>([]);
+  const [signals, setSignals] = useState<Signal[]>([]); // no signals from backend currently
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,18 +58,27 @@ const AssetsAnalysisPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/analysis/${symbol}?interval=${interval}`);
+      const apiInterval = intervalMap[interval];
+      const res = await fetch(`/api/bot/analyze?symbol=${symbol}`); // adjust API path as per your backend
       if (!res.ok) throw new Error(`Fetch error: ${res.statusText}`);
 
       const data: APIResponse = await res.json();
 
-      const formattedCandles = data.candles.map((c) => ({
-        ...c,
-        x: typeof c.x === 'number' ? c.x : new Date(c.x).getTime(),
+      const rawCandles = data[apiInterval] || [];
+
+      // Convert backend candle structure to chart candles (x,o,h,l,c)
+      // Your backend candles have: openTime, open, high, low, close, etc.
+      // We need to map accordingly
+      const formattedCandles = rawCandles.map((c: any) => ({
+        x: c.openTime,
+        o: c.open,
+        h: c.high,
+        l: c.low,
+        c: c.close,
       }));
 
       setCandles(formattedCandles);
-      setSignals(data.signals);
+      setSignals([]); // No signals currently from backend
     } catch (e: any) {
       setError(e.message || 'Unknown error');
       setCandles([]);
@@ -91,14 +103,7 @@ const AssetsAnalysisPage: React.FC = () => {
         borderColor: '#4e73df',
         borderWidth: 1,
       },
-      ...signals.map((s) => ({
-        type: 'scatter' as const,
-        label: `${s.type.toUpperCase()} Signal`,
-        data: [{ x: s.time, y: s.price }],
-        backgroundColor: s.type === 'buy' ? 'green' : 'red',
-        pointRadius: 6,
-        pointStyle: s.type === 'buy' ? 'triangle' : 'rectRot',
-      })),
+      // No signals yet
     ],
   };
 
@@ -111,7 +116,10 @@ const AssetsAnalysisPage: React.FC = () => {
     scales: {
       x: {
         type: 'timeseries',
-        time: { unit: 'minute' },
+        time: {
+          // Adjust time unit based on interval
+          unit: interval === 'hourly' ? 'hour' : interval === 'daily' ? 'day' : 'week',
+        },
         ticks: { source: 'auto' },
       },
       y: {

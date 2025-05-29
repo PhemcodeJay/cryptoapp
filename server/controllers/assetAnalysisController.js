@@ -1,4 +1,4 @@
-const analysisService = require('../services/analysisService'); // rename your service file to analysisService.js if needed
+const assetAnalysis = require('../services/assetAnalysis');
 
 /**
  * GET /api/bot/analyze?symbol=BTCUSDT
@@ -12,7 +12,7 @@ exports.getAnalysis = async (req, res) => {
   }
 
   try {
-    const analysis = await analysisService.analyze(symbol);
+    const analysis = await assetAnalysis.analyze(symbol); // use assetAnalysis here
     res.json({ symbol, analysis });
   } catch (error) {
     console.error('Error during analysis:', error);
