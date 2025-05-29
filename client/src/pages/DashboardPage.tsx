@@ -1,6 +1,5 @@
-// src/pages/DashboardPage.tsx
 import React, { useEffect, useState } from 'react';
-import WalletConnectProvider from '@walletconnect/web3-provider';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import Web3 from 'web3';
 
 import {
@@ -53,17 +52,21 @@ const DashboardPage: React.FC = () => {
 
   const connectWallet = async () => {
     try {
-      const walletConnectProvider = new WalletConnectProvider({
-        rpc: {
+      const provider = await EthereumProvider.init({
+        projectId: 'YOUR_PROJECT_ID',
+        chains: [1, 56],
+        methods: ['eth_sendTransaction', 'personal_sign', 'eth_signTypedData'],
+        rpcMap: {
           1: 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY',
           56: 'https://bsc-dataseed.binance.org/',
         },
+        showQrModal: true,
       });
 
-      await walletConnectProvider.enable();
-      const web3Instance = new Web3(walletConnectProvider as any);
-      const accounts = await web3Instance.eth.getAccounts();
-      const networkId = Number(await web3Instance.eth.net.getId());
+      await provider.enable();
+      const web3 = new Web3(provider as any);
+      const accounts = await web3.eth.getAccounts();
+      const networkId = Number(await web3.eth.net.getId());
 
       setAccount(accounts[0]);
       setChain(networkId === 56 ? 'bsc' : 'eth');
@@ -161,7 +164,7 @@ const DashboardPage: React.FC = () => {
       title: {
         display: true,
         text: `${selectedAsset} Candlestick Chart`,
-        font: { size: 20, weight: 700 },
+        font: { size: 20, weight: 'bold' },
         color: '#1f2937',
       },
     },
