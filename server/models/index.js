@@ -40,9 +40,9 @@ Bot.hasMany(BotTrade, { foreignKey: 'bot_id' });
 IndicatorValue.belongsTo(Bot, { foreignKey: 'bot_id', onDelete: 'CASCADE' });
 Bot.hasMany(IndicatorValue, { foreignKey: 'bot_id' });
 
-// User -> AssetAnalysis
-AssetAnalysis.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-User.hasMany(AssetAnalysis, { foreignKey: 'user_id' });
+// Wallet -> AssetAnalysis
+AssetAnalysis.belongsTo(Wallet, { foreignKey: 'wallet_id', onDelete: 'CASCADE' });
+Wallet.hasMany(AssetAnalysis, { foreignKey: 'wallet_id' });
 
 const Models = {
   User,

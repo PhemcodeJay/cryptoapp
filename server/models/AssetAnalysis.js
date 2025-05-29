@@ -1,41 +1,31 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-// IndicatorValues model
-const IndicatorValue = sequelize.define('IndicatorValue', {
-  botId: {
+const AssetAnalysis = sequelize.define('AssetAnalysis', {
+  id: {
+    type: DataTypes.BIGINT.UNSIGNED,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  walletId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
-    field: 'bot_id',
+    field: 'wallet_id',
   },
   symbol: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.STRING(50),
     allowNull: false,
   },
   timeframe: {
     type: DataTypes.STRING(10),
     allowNull: false,
   },
-  timestamp: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  ma20: {
-    type: DataTypes.DECIMAL(18, 8),
-    allowNull: true,
-    field: 'ma_20',
-  },
-  ma200: {
-    type: DataTypes.DECIMAL(18, 8),
-    allowNull: true,
-    field: 'ma_200',
-  },
-  macd: {
-    type: DataTypes.DECIMAL(18, 8),
-    allowNull: true,
-  },
   rsi: {
     type: DataTypes.DECIMAL(8, 4),
+    allowNull: true,
+  },
+  macd: {
+    type: DataTypes.DECIMAL(12, 6),
     allowNull: true,
   },
   stochRsi: {
@@ -43,66 +33,47 @@ const IndicatorValue = sequelize.define('IndicatorValue', {
     allowNull: true,
     field: 'stoch_rsi',
   },
-  volume: {
+  bollingerUpper: {
+    type: DataTypes.DECIMAL(18, 8),
+    allowNull: true,
+    field: 'bollinger_upper',
+  },
+  bollingerLower: {
+    type: DataTypes.DECIMAL(18, 8),
+    allowNull: true,
+    field: 'bollinger_lower',
+  },
+  movingAvg20: {
+    type: DataTypes.DECIMAL(18, 8),
+    allowNull: true,
+    field: 'moving_avg_20',
+  },
+  movingAvg200: {
+    type: DataTypes.DECIMAL(18, 8),
+    allowNull: true,
+    field: 'moving_avg_200',
+  },
+  volumeSma: {
     type: DataTypes.DECIMAL(18, 4),
     allowNull: true,
+    field: 'volume_sma',
   },
-  createdAt: {
+  signalGeneratedAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    field: 'created_at',
+    field: 'signal_generated_at',
     defaultValue: DataTypes.NOW,
   }
 }, {
-  tableName: 'indicator_values',
+  tableName: 'asset_analysis',
   timestamps: false,
   underscored: true,
   indexes: [
     {
-      unique: true,
-      fields: ['bot_id', 'symbol', 'timeframe', 'timestamp']
+      fields: ['wallet_id', 'symbol', 'timeframe'],
+      name: 'idx_wallet_symbol_timeframe',
     }
   ],
 });
 
-// BotSignals model
-const BotSignal = sequelize.define('BotSignal', {
-  botId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    field: 'bot_id',
-  },
-  symbol: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-  },
-  signalType: {
-    type: DataTypes.ENUM('buy', 'sell', 'hold'),
-    allowNull: false,
-    field: 'signal_type',
-  },
-  confidence: {
-    type: DataTypes.DECIMAL(5, 2),
-    allowNull: true,
-  },
-  generatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    field: 'generated_at',
-    defaultValue: DataTypes.NOW,
-  }
-}, {
-  tableName: 'bot_signals',
-  timestamps: false,
-  underscored: true,
-  indexes: [
-    {
-      fields: ['symbol', 'generated_at']
-    }
-  ],
-});
-
-module.exports = {
-  IndicatorValue,
-  BotSignal,
-};
+module.exports = AssetAnalysis;
