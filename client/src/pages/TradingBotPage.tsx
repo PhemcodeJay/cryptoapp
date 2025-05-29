@@ -12,7 +12,7 @@ const TradingBotPage: React.FC = () => {
   const [isTrading, setIsTrading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [address, setAddress] = useState<string>('');
-  const chain = 'eth'; // or dynamically allow user selection if needed
+  const chain = 'eth';
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -47,7 +47,11 @@ const TradingBotPage: React.FC = () => {
     setStatus('⏳ Executing trade...');
 
     try {
-      await hyperliquidService.tradeFutures(strategy, threshold, timeframe);
+      await hyperliquidService.tradeFutures(strategy, threshold, timeframe, {
+        walletAddress: address,
+        balanceToUse: walletBalance || undefined,
+        chain: chain,
+      });
       setStatus('✅ Trade executed successfully!');
     } catch (err) {
       setStatus('❌ Trade failed: ' + (err as any).message);

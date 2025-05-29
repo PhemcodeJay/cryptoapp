@@ -1,7 +1,8 @@
+require('dotenv').config();
 const axios = require('axios');
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const BSC_API_KEY = process.env.BSC_API_KEY;
+const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
 
 const USDT_CONTRACT_ETH = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 const USDT_CONTRACT_BSC = '0x55d398326f99059fF775485246999027B3197955';
@@ -33,14 +34,13 @@ async function fetchEthUsdtBalance(address) {
       },
     });
 
-    if (res.data.status !== '1') {
-      throw new Error(res.data.message || 'Failed to fetch USDT balance');
+    if (res.data.status !== '1' || !res.data.result) {
+      throw new Error(res.data.message || 'Failed to fetch Ethereum USDT balance');
     }
 
-    // USDT on Ethereum has 6 decimals
     return { balance: Number(res.data.result) / 1e6 };
   } catch (error) {
-    console.error('Error fetching Ethereum USDT balance:', error.message);
+    console.error('Error fetching Ethereum USDT balance:', error?.response?.data || error.message);
     return null;
   }
 }
@@ -55,8 +55,8 @@ async function fetchBscUsdtBalance(address) {
     console.error('Invalid BSC address');
     return null;
   }
-  if (!BSC_API_KEY) {
-    console.error('BSC_API_KEY is not set');
+  if (!BSCSCAN_API_KEY) {
+    console.error('BSCSCAN_API_KEY is not set');
     return null;
   }
 
@@ -68,18 +68,17 @@ async function fetchBscUsdtBalance(address) {
         contractaddress: USDT_CONTRACT_BSC,
         address,
         tag: 'latest',
-        apikey: BSC_API_KEY,
+        apikey: BSCSCAN_API_KEY,
       },
     });
 
-    if (res.data.status !== '1') {
-      throw new Error(res.data.message || 'Failed to fetch USDT balance');
+    if (res.data.status !== '1' || !res.data.result) {
+      throw new Error(res.data.message || 'Failed to fetch BSC USDT balance');
     }
 
-    // USDT on BSC has 18 decimals
     return { balance: Number(res.data.result) / 1e18 };
   } catch (error) {
-    console.error('Error fetching BSC USDT balance:', error.message);
+    console.error('Error fetching BSC USDT balance:', error?.response?.data || error.message);
     return null;
   }
 }

@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import axios from 'axios';
 
 // Extend the Window interface to include ethereum
@@ -7,7 +8,51 @@ declare global {
   }
 }
 
-const API_BASE = '/api/wallet'; // Adjust if your backend prefix is different
+// USDT contract addresses for Ethereum and BSC
+const USDT_CONTRACTS: Record<'eth' | 'bsc', string> = {
+  eth: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  bsc: '0x55d398326f99059fF775485246999027B3197955',
+};
+
+// Minimal ERC20 ABI
+const ERC20_ABI = [
+  'function balanceOf(address) view returns (uint256)',
+  'function decimals() view returns (uint8)',
+];
+
+const API_BASE = '/api/wallet'; // Backend route prefix
+
+/**
+ * Fetch USDT balance using ethers.js via on-chain RPC call
+ */
+export async function fetchUsdtBalance(
+  account: string,
+  chain: 'eth' | 'bsc'
+): Promise<{ balance: number } | null> {
+  try {
+    if (!ethers.isAddress(account)) throw new Error('Invalid wallet address');
+    if (!USDT_CONTRACTS[chain]) throw new Error('Unsupported chain');
+
+    const rpcUrl =
+      chain === 'eth'
+        ? 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID' // Replace with your Infura ID
+        : 'https://bsc-dataseed.binance.org/';
+
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const contract = new ethers.Contract(USDT_CONTRACTS[chain], ERC20_ABI, provider);
+
+    const [rawBalance, decimals] = await Promise.all([
+      contract.balanceOf(account),
+      contract.decimals(),
+    ]);
+
+    const formattedBalance = Number(ethers.formatUnits(rawBalance, decimals));
+    return { balance: formattedBalance };
+  } catch (error) {
+    console.error('fetchUsdtBalance error:', error);
+    return null;
+  }
+}
 
 interface WalletService {
   getWalletBalance(address: string, chain?: 'eth' | 'bsc' | 'matic' | 'sol'): Promise<number>;
@@ -18,17 +63,12 @@ interface WalletService {
 }
 
 const walletService: WalletService = {
-  /**
-   * Get USDT wallet balance from the backend
-   * @param {string} address Wallet address
-   * @param {'eth'|'bsc'|'matic'|'sol'} chain Blockchain chain
-   * @returns {Promise<number>} USDT balance
-   */
-  async getWalletBalance(address: string, chain = 'eth') {
+  async getWalletBalance(address: string, chain = 'eth'): Promise<number> {
     try {
       const res = await axios.get(`${API_BASE}/balance`, {
         params: { address, chain },
       });
+
       if (res.data && typeof res.data.balance === 'number') {
         return res.data.balance;
       }
@@ -39,54 +79,56 @@ const walletService: WalletService = {
     }
   },
 
-  /**
-   * Connect to MetaMask and get wallet address
-   * @returns {Promise<string>} Wallet address
-   */
   async connectMetaMask(): Promise<string> {
-    if (!window.ethereum) throw new Error('MetaMask not installed');
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    return accounts[0];
+    try {
+      if (!window.ethereum) throw new Error('MetaMask not found');
+
+      // ethers v6+ uses BrowserProvider
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send('eth_requestAccounts', []);
+      if (!accounts.length) throw new Error('No MetaMask accounts found');
+      return accounts[0];
+    } catch (error: any) {
+      throw new Error('MetaMask connection failed: ' + error.message);
+    }
   },
 
-  /**
-   * Connect to Trust Wallet and get wallet address
-   * @returns {Promise<string>} Wallet address
-   */
   async connectTrustWallet(): Promise<string> {
-    const provider = (window as any).trustwallet;
-    if (!provider) throw new Error('Trust Wallet not found');
-    const accounts = await provider.request({ method: 'eth_requestAccounts' });
-    return accounts[0];
+    try {
+      if (!window.ethereum) throw new Error('Trust Wallet not found');
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send('eth_requestAccounts', []);
+      if (!accounts.length) throw new Error('No Trust Wallet accounts found');
+      return accounts[0];
+    } catch (error: any) {
+      throw new Error('Trust Wallet connection failed: ' + error.message);
+    }
   },
 
-  /**
-   * Sync wallet data with backend
-   */
-  async syncWallet(walletAddress: string, chain: string) {
-    const res = await fetch('/api/wallet/sync', {
+  async syncWallet(walletAddress: string, chain: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ walletAddress, chain }),
     });
+
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Sync failed');
+      throw new Error(err.error || 'Wallet sync failed');
     }
+
     return res.json();
   },
 
-  /**
-   * Get portfolio summary from backend
-   */
-  async getPortfolio(walletAddress: string, chain: string) {
-    const res = await fetch(
-      `/api/wallet/portfolio?walletAddress=${walletAddress}&chain=${chain}`
-    );
+  async getPortfolio(walletAddress: string, chain: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/portfolio?walletAddress=${walletAddress}&chain=${chain}`);
+
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.error || 'Portfolio fetch failed');
     }
+
     return res.json();
   },
 };

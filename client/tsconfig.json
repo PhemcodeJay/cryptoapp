@@ -1,5 +1,38 @@
 {
-  "files": [],
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    "jsx": "react-jsx",
+
+    "allowJs": true,
+    "useDefineForClassFields": true,
+
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "outDir": "dist",
+    "noEmit": true,
+
+    "types": ["vite/client", "node"],
+
+    "composite": true
+  },
+  "include": ["src/**/*", "server/**/*", "vite.config.ts"],
+  "exclude": ["dist", "node_modules"],
+
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

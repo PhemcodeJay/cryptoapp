@@ -19,7 +19,7 @@ const WalletConnectPage: React.FC = () => {
   const syncWallet = async (address: string, selectedChain: string) => {
     try {
       const response = await walletService.syncWallet(address, selectedChain);
-      setMessage(response.message || 'Wallet synced!');
+      setMessage(response.message || 'Wallet synced successfully!');
       await fetchPortfolio(address, selectedChain);
     } catch (err: any) {
       console.error('Sync error:', err);
@@ -30,7 +30,7 @@ const WalletConnectPage: React.FC = () => {
   const fetchPortfolio = async (address: string, selectedChain: string) => {
     try {
       const response = await walletService.getPortfolio(address, selectedChain);
-      setBalance(response.balance || 0);
+      setBalance(response.balance ?? 0);
     } catch (err: any) {
       console.error('Fetch portfolio failed:', err);
       setError(err.message || 'Failed to fetch portfolio');
@@ -64,16 +64,21 @@ const WalletConnectPage: React.FC = () => {
   }, [chain]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-indigo-800 via-purple-700 to-pink-600 text-white px-6 py-10">
-      <h1 className="text-4xl font-extrabold mb-4">🔐 Connect Your Wallet</h1>
-      <p className="text-lg text-center max-w-xl mb-6 opacity-90">
-        Access your portfolio and trading tools by connecting a Web3 wallet.
-      </p>
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 flex flex-col items-center justify-center px-6 py-12 text-white font-sans">
+      <section className="bg-gray-800 bg-opacity-80 rounded-xl shadow-xl max-w-md w-full p-8">
+        <h1 className="text-4xl font-extrabold mb-6 text-center tracking-tight drop-shadow-lg">
+          🔐 Connect Your Wallet
+        </h1>
+        <p className="text-center text-gray-300 mb-8 leading-relaxed">
+          Access your portfolio and trading tools by connecting a Web3 wallet.
+        </p>
 
-      <div className="mb-6">
-        <label className="block mb-1 text-sm">Select Blockchain</label>
+        <label htmlFor="chain-select" className="block mb-2 font-semibold text-gray-200">
+          Select Blockchain
+        </label>
         <select
-          className="px-4 py-2 rounded text-black font-medium"
+          id="chain-select"
+          className="w-full mb-6 px-4 py-3 rounded-lg bg-gray-700 text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
           value={chain}
           onChange={(e) => setChain(e.target.value)}
         >
@@ -83,50 +88,52 @@ const WalletConnectPage: React.FC = () => {
             </option>
           ))}
         </select>
-      </div>
 
-      <div className="flex flex-col sm:flex-row gap-6 mb-6">
-        <button
-          onClick={() => connectWallet('metamask')}
-          disabled={connecting}
-          className="px-6 py-3 bg-yellow-400 text-black font-semibold rounded-lg shadow hover:bg-yellow-300 transition disabled:opacity-50"
-        >
-          🦊 {connecting ? 'Connecting...' : 'Connect MetaMask'}
-        </button>
+        <div className="flex flex-col sm:flex-row justify-center gap-5 mb-8">
+          <button
+            onClick={() => connectWallet('metamask')}
+            disabled={connecting}
+            className="flex items-center justify-center gap-3 bg-yellow-400 text-black font-semibold rounded-lg shadow-md px-6 py-3 hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="text-2xl">🦊</span>
+            {connecting ? 'Connecting...' : 'Connect MetaMask'}
+          </button>
 
-        <button
-          onClick={() => connectWallet('trust')}
-          disabled={connecting}
-          className="px-6 py-3 bg-blue-500 font-semibold rounded-lg shadow hover:bg-blue-400 transition disabled:opacity-50"
-        >
-          🔵 {connecting ? 'Connecting...' : 'Connect Trust Wallet'}
-        </button>
-      </div>
+          <button
+            onClick={() => connectWallet('trust')}
+            disabled={connecting}
+            className="flex items-center justify-center gap-3 bg-blue-600 font-semibold rounded-lg shadow-md px-6 py-3 hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-400 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="text-2xl">🔵</span>
+            {connecting ? 'Connecting...' : 'Connect Trust Wallet'}
+          </button>
+        </div>
 
-      {walletAddress && (
-        <p className="mt-4 text-green-400 font-semibold">
-          Connected: <code>{walletAddress}</code>
+        {walletAddress && (
+          <p className="text-green-400 font-semibold mb-3 break-all text-center select-text">
+            Connected: <code>{walletAddress}</code>
+          </p>
+        )}
+
+        {balance !== null && (
+          <p className="text-center text-lg font-bold text-white mb-3">
+            📊 Balance: <span className="text-green-300">${balance.toFixed(2)} USDT</span>
+          </p>
+        )}
+
+        {message && (
+          <p className="text-center text-green-300 font-medium mb-3">{message}</p>
+        )}
+
+        {error && (
+          <p className="text-center text-red-500 font-semibold mb-3">{error}</p>
+        )}
+
+        <p className="text-center text-gray-400 text-sm mt-8 select-none">
+          Your wallet stays private — we never store keys.
         </p>
-      )}
-
-      {balance !== null && (
-        <p className="mt-2 text-lg font-bold text-white">
-          📊 Balance: <span className="text-green-300">${balance.toFixed(2)} USDT</span>
-        </p>
-      )}
-
-      {message && (
-        <p className="mt-4 text-green-300">{message}</p>
-      )}
-
-      {error && (
-        <p className="mt-4 text-red-500 font-semibold">Error: {error}</p>
-      )}
-
-      <p className="mt-10 text-sm text-white text-opacity-80">
-        Your wallet stays private — we never store keys.
-      </p>
-    </div>
+      </section>
+    </main>
   );
 };
 

@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/PhemcodeJay/cryptoapp#readme",
   "dependencies": {
+    "@walletconnect/web3-provider": "^1.8.0",
     "@web3-react/core": "^8.2.3",
     "@web3-react/injected-connector": "^6.0.7",
     "axios": "^1.6.7",
@@ -44,7 +45,7 @@
     "cors": "^2.8.5",
     "debug": "^4.4.1",
     "dotenv": "^16.3.1",
-    "ethers": "^6.7.1",
+    "ethers": "^6.14.3",
     "express": "^4.18.2",
     "express-rate-limit": "^6.8.0",
     "jsonwebtoken": "^9.0.2",
@@ -55,10 +56,14 @@
     "react-chartjs-2": "^5.3.0",
     "react-router-dom": "^7.6.0",
     "sequelize": "^6.37.0",
+    "web3": "^4.16.0",
+    "web3modal": "^1.9.12",
     "winston": "^3.11.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.7",
+    "@types/node": "^22.15.24",
+    "@types/react": "^19.1.6",
     "autoprefixer": "^10.4.21",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
@@ -71,7 +76,8 @@
     "postcss": "^8.5.3",
     "supertest": "^6.3.4",
     "tailwindcss": "^4.1.7",
-    "tsx": "^4.19.4"
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18.0.0",
