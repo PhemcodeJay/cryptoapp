@@ -1,7 +1,8 @@
 const { WalletBalance } = require('../models');
-const walletService = require('../services/walletService'); // For addWallet, getWallets, etc.
+const walletService = require('../services/walletService');
+const { fetchUsdtBalance } = require('../services/walletService'); // Already exports fetchEthUsdtBalance, fetchBscUsdtBalance, fetchUsdtBalance
 
-// Helper: classify asset symbols into categories
+// Classify assets into categories
 const classifyAsset = (symbol) => {
   if (['USDT', 'USDC', 'DAI'].includes(symbol)) return 'Stablecoins';
   if (['BTC', 'ETH'].includes(symbol)) return 'Majors';
@@ -9,17 +10,7 @@ const classifyAsset = (symbol) => {
   return 'Others';
 };
 
-// Mock function simulating external wallet data fetch (replace with real API)
-const fetchWalletData = async (walletAddress) => {
-  // Example dummy data; replace with real blockchain API calls as needed
-  return [
-    { symbol: 'ETH', amount: 2.5, price: 1800, change24h: 4.5 },
-    { symbol: 'USDT', amount: 1000, price: 1, change24h: 0 },
-    { symbol: 'MATIC', amount: 500, price: 0.8, change24h: -3.2 },
-  ];
-};
-
-// Add a wallet for a user
+// Add a new wallet
 exports.addWallet = async (req, res) => {
   try {
     const wallet = await walletService.addWallet(req.body);
@@ -30,7 +21,7 @@ exports.addWallet = async (req, res) => {
   }
 };
 
-// Get wallets for a user by userId query parameter
+// Get all wallets for a user
 exports.getWallets = async (req, res) => {
   const userId = req.query.userId;
   if (!userId) {
@@ -46,30 +37,36 @@ exports.getWallets = async (req, res) => {
   }
 };
 
-// Sync wallet balances from external provider and update DB
+// Sync wallet balances using real USDT data
 exports.syncWallet = async (req, res) => {
+  const { walletAddress, chain = 'eth' } = req.body;
+
+  if (!walletAddress || typeof walletAddress !== 'string') {
+    return res.status(400).json({ error: 'walletAddress is required' });
+  }
+
   try {
-    // You can pass wallet address from req.body if needed; for now, placeholder:
-    const walletAddress = req.body.walletAddress || '0x123...'; // Replace as needed
+    const usdtData = await fetchUsdtBalance(walletAddress, chain);
+    if (!usdtData) {
+      return res.status(500).json({ error: 'Failed to fetch USDT balance from blockchain' });
+    }
 
-    // Fetch latest wallet balances from external provider
-    const balances = await fetchWalletData(walletAddress);
-
-    // Clear old balances for this wallet before inserting new ones
     await WalletBalance.destroy({ where: { wallet: walletAddress } });
 
-    // Insert new balance records
-    for (const asset of balances) {
-      await WalletBalance.create({
-        wallet: walletAddress,
-        symbol: asset.symbol,
-        balance: asset.amount,
-        price: asset.price,
-        value: asset.amount * asset.price,
-        assetClass: classifyAsset(asset.symbol),
-        change24h: asset.change24h,
-      });
-    }
+    const symbol = 'USDT';
+    const price = 1; // USDT is always ~$1
+    const amount = usdtData.balance;
+    const value = amount * price;
+
+    await WalletBalance.create({
+      wallet: walletAddress,
+      symbol,
+      balance: amount,
+      price,
+      value,
+      assetClass: classifyAsset(symbol),
+      change24h: 0, // You could integrate Coingecko or Binance API for real 24h change
+    });
 
     res.json({ message: 'Wallet synced successfully', wallet: walletAddress });
   } catch (err) {
@@ -78,25 +75,22 @@ exports.syncWallet = async (req, res) => {
   }
 };
 
-// Get summary of wallet balances grouped by asset class, including top gainers and losers
+// Get summary of wallet balances
 exports.getSummary = async (req, res) => {
   try {
     const balances = await WalletBalance.findAll();
 
-    // Group balances by asset class and sum their values
     const grouped = {};
     balances.forEach(asset => {
       const cls = asset.assetClass || 'Others';
       grouped[cls] = (grouped[cls] || 0) + asset.value;
     });
 
-    // Get top 3 gainers by 24h change
     const gainers = balances
       .filter(a => a.change24h > 0)
       .sort((a, b) => b.change24h - a.change24h)
       .slice(0, 3);
 
-    // Get top 3 losers by 24h change
     const losers = balances
       .filter(a => a.change24h < 0)
       .sort((a, b) => a.change24h - b.change24h)
@@ -113,7 +107,7 @@ exports.getSummary = async (req, res) => {
   }
 };
 
-// Get candlestick chart data (mocked)
+// Mocked candlestick chart data
 exports.getCandlestickData = async (req, res) => {
   try {
     const data = [
