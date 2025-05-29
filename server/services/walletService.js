@@ -103,3 +103,5 @@ module.exports = {
   fetchBscUsdtBalance,
   fetchUsdtBalance,
 };
+
+export default walletService;

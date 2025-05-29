@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import walletService from '../services/walletService';
-import hyperliquidService from '../services/hyperliquidService';
+import walletService from '../../services/walletService';
+import hyperliquidService from '../../services/hyperliquidService';
 
 const TradingBotPage: React.FC = () => {
   const [strategy, setStrategy] = useState('MACD');

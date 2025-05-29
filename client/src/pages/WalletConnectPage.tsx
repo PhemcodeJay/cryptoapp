@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import walletService from '../services/walletService'; // adjust path as needed
+import walletService from '../../services/walletService'; // ✅ Corrected path
+
 
 const WalletConnectPage: React.FC = () => {
   const [connecting, setConnecting] = useState<boolean>(false);
