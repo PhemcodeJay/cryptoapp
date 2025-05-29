@@ -1,10 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import walletService from '../services/walletService';
+import hyperliquidService from '../services/hyperliquidService';
 
 const TradingBotPage: React.FC = () => {
   const [strategy, setStrategy] = useState('MACD');
   const [threshold, setThreshold] = useState(10);
   const [botEnabled, setBotEnabled] = useState(false);
   const [timeframe, setTimeframe] = useState('daily');
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [status, setStatus] = useState<string>('');
+  const [isTrading, setIsTrading] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const balance = await walletService.getWalletBalance();
+        setWalletBalance(balance);
+      } catch (err) {
+        setStatus('⚠️ Failed to load wallet balance');
+        console.error(err);
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
+  const handleTrade = async () => {
+    setStatus('');
+    if (!botEnabled) {
+      setStatus('❌ Bot must be enabled to trade');
+      return;
+    }
+
+    if (walletBalance !== null && walletBalance < 5) {
+      setStatus('⚠️ Minimum $5 USDT required to trade.');
+      return;
+    }
+
+    setIsTrading(true);
+    setStatus('⏳ Executing trade...');
+
+    try {
+      await hyperliquidService.tradeFutures(strategy, threshold, timeframe);
+      setStatus('✅ Trade executed successfully!');
+    } catch (err) {
+      setStatus('❌ Trade failed: ' + (err as any).message);
+    } finally {
+      setIsTrading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-10">
@@ -14,6 +58,10 @@ const TradingBotPage: React.FC = () => {
         </h1>
 
         <div className="space-y-8">
+          {/* Wallet Balance */}
+          <div className="text-right text-sm font-medium text-gray-600">
+            Wallet Balance: {walletBalance !== null ? `$${walletBalance.toFixed(2)}` : 'Loading...'}
+          </div>
 
           {/* Strategy Select */}
           <div>
@@ -79,14 +127,20 @@ const TradingBotPage: React.FC = () => {
             <p><strong>Status:</strong> {botEnabled ? 'Enabled ✅' : 'Disabled ❌'}</p>
           </div>
 
-          {/* Submit Button */}
+          {/* Trade Button */}
           <button
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            onClick={() => alert('Configuration saved!')}
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+            onClick={handleTrade}
+            disabled={isTrading}
           >
-            Save Configuration
+            {isTrading ? 'Trading...' : 'Execute Trade'}
           </button>
 
+          {status && (
+            <div className="text-center mt-4 text-sm font-medium text-gray-700">
+              {status}
+            </div>
+          )}
         </div>
       </div>
     </div>

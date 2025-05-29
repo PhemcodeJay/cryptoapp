@@ -1,35 +1,31 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const walletService = require('./walletService'); // updated wallet service
 
-const BINANCE_API_KEY = process.env.BINANCE_API_KEY;
-const BINANCE_SECRET = process.env.BINANCE_SECRET;
+const HYPERLIQUID_API_URL = 'https://api.hyperliquid.xyz/futures/order'; // example
 
-/**
- * Helper: Create signature for Binance REST API query string
- */
-function getSignature(queryString) {
-  return crypto.createHmac('sha256', BINANCE_SECRET).update(queryString).digest('hex');
+function createSignature(payload, secret) {
+  const message = JSON.stringify(payload);
+  return crypto.createHmac('sha256', secret).update(message).digest('hex');
 }
 
 /**
- * Fetch current price for a symbol from Binance
+ * Fetch USDT wallet balance for trading
+ * @param {string} walletAddress 
+ * @param {'eth'|'bsc'} chain - Chain network, default to 'eth'
+ * @returns {Promise<number>} - USDT balance
  */
-async function getCurrentPrice(symbol) {
+async function getWalletUsdtBalance(walletAddress, chain = 'eth') {
   try {
-    const response = await axios.get('https://fapi.binance.com/fapi/v1/ticker/price', {
-      params: { symbol }
-    });
-    return parseFloat(response.data.price);
+    const result = await walletService.fetchUsdtBalance(walletAddress, chain);
+    if (!result) return 0;
+    return result.balance || 0;
   } catch (err) {
-    console.error('Error fetching current price:', err.message);
-    return null;
+    console.error('Error fetching USDT wallet balance:', err.message);
+    return 0;
   }
 }
 
-/**
- * Simulate order fill based on price and quantity
- * You can expand this with slippage, partial fills, etc.
- */
 function simulateOrder(symbol, side, quantity, price) {
   return {
     symbol,
@@ -46,56 +42,71 @@ function simulateOrder(symbol, side, quantity, price) {
   };
 }
 
-/**
- * Main function to place or simulate futures order.
- * Modes:
- * - 'real' = place real Binance order
- * - 'demo' = simulate order at current price, no real API call
- * - 'backtest' = simulate order with provided historical data (to be implemented)
- */
-async function placeFuturesOrder(symbol, side, quantity, options = {}) {
-  const mode = options.mode || (BINANCE_API_KEY && BINANCE_SECRET ? 'real' : 'demo');
-
-  if (mode === 'backtest') {
-    // For backtest, expect options.historicalPrice to be passed
-    if (!options.historicalPrice) {
-      throw new Error('Historical price required for backtest mode');
-    }
-    // Simulate order fill at historical price
-    return simulateOrder(symbol, side, quantity, options.historicalPrice);
+async function getCurrentPrice(symbol) {
+  try {
+    const response = await axios.get(`https://api.hyperliquid.xyz/markets/${symbol}/ticker`);
+    return parseFloat(response.data.price);
+  } catch (err) {
+    console.error('Error fetching current price:', err.message);
+    return null;
   }
+}
 
+/**
+ * Place futures order on Hyperliquid
+ * @param {object} params
+ * @param {string} params.walletAddress
+ * @param {string} params.walletSecret
+ * @param {string} params.symbol
+ * @param {'buy'|'sell'} params.side
+ * @param {number} params.quantity
+ * @param {'demo'|'real'} params.mode
+ * @param {'eth'|'bsc'} params.chain - specify chain for USDT balance fetch
+ * @returns {Promise<object>}
+ */
+async function placeFuturesOrder({ walletAddress, walletSecret, symbol, side, quantity, mode = 'demo', chain = 'eth' }) {
   if (mode === 'demo') {
     console.warn('⚠️ Running in DEMO mode - no real orders placed.');
-
-    // Fetch current market price
     const currentPrice = await getCurrentPrice(symbol);
     if (!currentPrice) {
-      return {
-        error: 'Failed to fetch current price for demo simulation'
-      };
+      return { error: 'Failed to fetch current price for demo simulation' };
     }
     return simulateOrder(symbol, side, quantity, currentPrice);
   }
 
-  // Real mode - place order on Binance
-  if (!BINANCE_API_KEY || !BINANCE_SECRET) {
-    throw new Error('API keys required for real mode');
+  if (!walletAddress || !walletSecret) {
+    throw new Error('walletAddress and walletSecret are required for real trading');
   }
 
-  const timestamp = Date.now();
-  const query = `symbol=${symbol}&side=${side}&type=MARKET&quantity=${quantity}&timestamp=${timestamp}`;
-  const signature = getSignature(query);
-  const url = `https://fapi.binance.com/fapi/v1/order?${query}&signature=${signature}`;
+  // Check USDT balance before placing order
+  const balance = await getWalletUsdtBalance(walletAddress, chain);
+  if (balance < quantity) {
+    return { error: `Insufficient USDT balance (${balance}) to place order of quantity ${quantity}` };
+  }
+
+  const payload = {
+    walletAddress,
+    symbol,
+    side,
+    quantity,
+    type: 'MARKET',
+    timestamp: Date.now(),
+  };
+
+  const signature = createSignature(payload, walletSecret);
 
   try {
-    const response = await axios.post(url, null, {
-      headers: { 'X-MBX-APIKEY': BINANCE_API_KEY }
+    const response = await axios.post(HYPERLIQUID_API_URL, payload, {
+      headers: {
+        'X-Wallet-Address': walletAddress,
+        'X-Signature': signature,
+        'Content-Type': 'application/json',
+      }
     });
     return response.data;
   } catch (err) {
-    console.error('Error placing futures order:', err.message);
-    return null;
+    console.error('Error placing futures order:', err.response?.data || err.message);
+    return { error: err.message || 'Failed to place order' };
   }
 }
 

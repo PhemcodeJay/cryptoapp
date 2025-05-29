@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -7,7 +6,7 @@ import IndexPage from './pages/index';
 import WalletConnectPage from './pages/WalletConnectPage';
 import DashboardPage from './pages/DashboardPage';
 import TradingBotPage from './pages/TradingBotPage';
-import AssetsAnalysisPage from './pages/AssetsAnalysisPage';
+import AssetsAnalysisPage from './pages/AssetsAnalysisPage';  // <-- default import
 import LogoutPage from './pages/LogoutPage';
 
 function App() {

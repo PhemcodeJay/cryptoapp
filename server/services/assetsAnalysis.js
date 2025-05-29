@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-// --- Indicator helpers ---
+// --- Indicator helpers (unchanged) ---
 
 function calculateSMA(data, window) {
   const sma = [];
@@ -130,9 +130,13 @@ function calculateStochasticRSI(rsi, window = 14) {
   return stochasticRsi;
 }
 
-// --- Main function to fetch candles & calculate indicators ---
+// --- Main analyze function with requested timeframes and indicators ---
 
-exports.analyze = async (symbol, intervals = ['1h', '1d', '1w'], limit = 200) => {
+exports.analyze = async (symbol) => {
+  // Set required intervals: 4hr, 1 day, 1 week
+  const intervals = ['4h', '1d', '1w'];
+  const limit = 200; // Number of candles to fetch
+
   const results = {};
 
   for (const interval of intervals) {
@@ -153,7 +157,7 @@ exports.analyze = async (symbol, intervals = ['1h', '1d', '1w'], limit = 200) =>
       const closes = candles.map(c => c.close);
       const volumes = candles.map(c => c.volume);
 
-      // Indicators
+      // Calculate indicators
       const ma20 = calculateSMA(closes, 20);
       const ma200 = calculateSMA(closes, 200);
       const stddev20 = calculateStdDev(closes, 20);
@@ -172,7 +176,7 @@ exports.analyze = async (symbol, intervals = ['1h', '1d', '1w'], limit = 200) =>
       const stochRsi = calculateStochasticRSI(rsi);
       const volumeSma = calculateSMA(volumes, 14);
 
-      // Attach indicators
+      // Attach indicators to candles
       for (let i = 0; i < candles.length; i++) {
         candles[i].ma20 = ma20[i];
         candles[i].ma200 = ma200[i];
