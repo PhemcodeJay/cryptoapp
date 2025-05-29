@@ -4,9 +4,12 @@ const API_BASE = '/api/hyperliquid';
 
 interface TradeOptions {
   walletAddress?: string;
-  balanceToUse?: number;
-  signature?: string;
-  chain?: string;
+  walletSecret?: string;
+  symbol: string;
+  side: 'buy' | 'sell';
+  quantity: number;
+  mode?: 'demo' | 'real';
+  chain?: 'eth' | 'bsc';
 }
 
 interface TradeResponse {
@@ -20,26 +23,17 @@ interface TradeResponse {
  */
 const hyperliquidService = {
   /**
-   * Execute a futures trade by calling the backend trading bot
-   * @param strategy - Trading strategy (e.g., 'MACD', 'RSI')
-   * @param threshold - Profit threshold percentage
-   * @param timeframe - Timeframe string ('hourly', 'daily', 'weekly')
-   * @param options - Additional trade options
+   * Place a futures order via backend
+   * @param options - Trading order options
    * @returns Promise resolving to trade result
    */
-  async tradeFutures(
-    strategy: string,
-    threshold: number,
-    timeframe: string,
-    options: TradeOptions = {}
-  ): Promise<TradeResponse> {
+  async placeFuturesOrder(options: TradeOptions): Promise<TradeResponse> {
     try {
-      const payload = { strategy, threshold, timeframe, ...options };
-      const response = await axios.post(`${API_BASE}/trade`, payload);
+      const response = await axios.post(`${API_BASE}/trade`, options);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error executing trade:', error);
-      throw new Error(error?.response?.data?.message || 'Trade failed');
+      console.error('❌ Error placing futures order:', error);
+      throw new Error(error?.response?.data?.message || 'Order failed');
     }
   },
 };

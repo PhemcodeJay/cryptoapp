@@ -11,9 +11,8 @@ const botController = require('../controllers/botController');
 // GET /api/bot/analyze?symbol=BTCUSDT&interval=1h
 router.get('/analyze', botController.getAnalysis);
 
-// Future Expansion:
-// - Execute trade
-// - Fetch or update bot config
-// - View past bot actions/logs
+// Place a futures trade order
+// POST /api/bot/trade
+router.post('/trade', botController.tradeFutures);
 
 module.exports = router;
