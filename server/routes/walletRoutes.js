@@ -2,39 +2,58 @@ const express = require('express');
 const router = express.Router();
 
 const walletController = require('../controllers/walletController');
-const { fetchWallet } = require('../services/walletService'); // Adjust path as needed
+const { fetchUsdtBalance } = require('../services/walletService');
 
-// POST /api/wallet/ - add a new wallet
+// ================================
+// Wallet CRUD and Sync Endpoints
+// ================================
+
+// Add a new wallet
+// POST /api/wallet/
 router.post('/', walletController.addWallet);
 
-// GET /api/wallet/ - get all wallets
+// Get all wallets
+// GET /api/wallet/
 router.get('/', walletController.getWallets);
 
-// POST /api/wallet/sync - sync wallet data
+// Sync wallet data
+// POST /api/wallet/sync
 router.post('/sync', walletController.syncWallet);
 
-// GET /api/wallet/summary - get wallet summary
+// Get wallet summary (e.g., top gainers, losers)
+// GET /api/wallet/summary
 router.get('/summary', walletController.getSummary);
 
-// GET /api/wallet/candlestick - get candlestick chart data
+// Get candlestick chart data for a wallet's assets
+// GET /api/wallet/candlestick
 router.get('/candlestick', walletController.getCandlestickData);
 
-// Additional route for wallet balance summary using fetchWallet service
+// =======================================
+// Get wallet USDT balance (on-chain)
+// =======================================
+
+// Example: GET /api/wallet/wallet-summary?address=0x123&chain=eth
 router.get('/wallet-summary', async (req, res) => {
-  const { address, chain } = req.query;
+  const { address, chain = 'eth' } = req.query;
 
   if (!address) {
     return res.status(400).json({ error: 'Wallet address is required' });
   }
 
   try {
-    const data = await fetchWallet(address, chain || 'eth');
+    const data = await fetchUsdtBalance(address, chain);
+
     if (!data) {
       return res.status(404).json({ error: 'Could not fetch wallet balance' });
     }
-    return res.json({ address, chain: chain || 'eth', balance: data.balance });
+
+    return res.json({
+      address,
+      chain,
+      balance: data.balance,
+    });
   } catch (error) {
-    console.error('API error:', error);
+    console.error('Error fetching wallet balance:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

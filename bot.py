@@ -3,202 +3,153 @@ import ccxt
 import pandas as pd
 import numpy as np
 import requests
+import argparse
 from dotenv import load_dotenv
 from ta.volatility import BollingerBands
 from ta.trend import MACD
 from ta.momentum import RSIIndicator, StochasticOscillator
 from datetime import datetime
 
-# Load environment variables
+# Load .env
 load_dotenv()
 
 class TradingBot:
-    def __init__(self):
-        # Initialize configuration
+    def __init__(self, strategy, timeframe, balance, wallet, signature, threshold):
+        # CLI parameters
+        self.strategy = strategy
+        self.timeframe = timeframe
+        self.trade_usd = float(balance)
+        self.wallet = wallet
+        self.signature = signature
+        self.threshold = float(threshold)
+
+        # Config from .env
         self.api_key = os.getenv("API_KEY")
         self.api_secret = os.getenv("API_SECRET")
         self.telegram_token = os.getenv("TELEGRAM_TOKEN")
         self.telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        self.trade_usd = float(os.getenv("TRADE_USD", 1))
         self.symbol = os.getenv("SYMBOL", "DOGE/USDT")
-        self.timeframe = os.getenv("TIMEFRAME", "5m")
         self.limit = int(os.getenv("LIMIT", 500))
-        
-        # Initialize logging system
-        self.log_dir = os.path.join(os.getcwd(), "trading_logs")
-        self.trades_file = os.path.join(self.log_dir, "trades.csv")
-        self.signals_file = os.path.join(self.log_dir, "signals.log")
-        self._init_logging_system()
 
-        # Trading parameters
-        self.stop_loss_pct = 0.10  # 10%
-        self.take_profit_min_pct = 0.50  # 50% min
-        self.take_profit_max_pct = 1.00  # 100% max
+        # Derived config
+        self.stop_loss_pct = 0.10
+        self.take_profit_min_pct = 0.50
+        self.take_profit_max_pct = 1.00
         self.in_position = False
         self.entry_price = 0
         self.demo_mode = not (self.api_key and self.api_secret)
 
-        # Initialize exchange
+        # Logging setup
+        self.log_dir = os.path.join(os.getcwd(), f"logs/{self.timeframe}")
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.trades_file = os.path.join(self.log_dir, "trades.csv")
+        self.signals_file = os.path.join(self.log_dir, "signals.log")
+        self._init_logs()
+
+        # Exchange setup
         self.exchange = self._init_exchange()
 
-    def _init_logging_system(self):
-        """Initialize logging directory and files"""
-        try:
-            os.makedirs(self.log_dir, exist_ok=True)
-            
-            # Initialize trades CSV if doesn't exist
-            if not os.path.exists(self.trades_file):
-                with open(self.trades_file, 'w') as f:
-                    f.write("timestamp,mode,trade_type,price,amount,reason\n")
-            
-            # Initialize signals log
-            if not os.path.exists(self.signals_file):
-                with open(self.signals_file, 'w') as f:
-                    f.write("=== Trading Signals Log ===\n")
-        except Exception as e:
-            print(f"Failed to initialize logging system: {e}")
-            raise
+    def _init_logs(self):
+        if not os.path.exists(self.trades_file):
+            with open(self.trades_file, 'w') as f:
+                f.write("timestamp,mode,trade_type,price,amount,reason\n")
+        if not os.path.exists(self.signals_file):
+            with open(self.signals_file, 'w') as f:
+                f.write("=== Trading Signals Log ===\n")
 
     def _init_exchange(self):
-        """Initialize the exchange connection"""
         if self.demo_mode:
-            print("Running in DEMO mode - no real trades will be executed")
-            return ccxt.binance()  # Public API only
-        
+            print("DEMO mode enabled")
+            return ccxt.binance()
         try:
             exchange = ccxt.binance({
                 'apiKey': self.api_key,
                 'secret': self.api_secret,
                 'enableRateLimit': True,
-                'options': {
-                    'adjustForTimeDifference': True
-                }
+                'options': {'adjustForTimeDifference': True}
             })
-            # Test connection
             exchange.fetch_balance()
             return exchange
         except Exception as e:
-            print(f"Failed to initialize exchange: {e}")
-            print("Falling back to DEMO mode")
+            print(f"Exchange init failed: {e}")
             self.demo_mode = True
             return ccxt.binance()
 
-    def _log_signal(self, message):
-        """Log a trading signal to the log file"""
+    def _log_signal(self, msg):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"[{timestamp}] {message}\n"
-        try:
-            with open(self.signals_file, 'a') as f:
-                f.write(log_entry)
-        except Exception as e:
-            print(f"Failed to log signal: {e}")
+        with open(self.signals_file, 'a') as f:
+            f.write(f"[{timestamp}] {msg}\n")
 
-    def send_telegram(self, message):
-        if not (self.telegram_token and self.telegram_chat_id):
+    def send_telegram(self, msg):
+        if not self.telegram_token or not self.telegram_chat_id:
             return
-            
+        url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
         try:
-            url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
-            data = {"chat_id": self.telegram_chat_id, "text": message}
-            requests.post(url, data=data)
+            requests.post(url, data={"chat_id": self.telegram_chat_id, "text": msg})
         except Exception as e:
-            print(f"Telegram alert failed: {e}")
+            print(f"Telegram error: {e}")
 
     def fetch_data(self):
         try:
-            bars = self.exchange.fetch_ohlcv(
-                self.symbol, 
-                timeframe=self.timeframe, 
-                limit=self.limit
-            )
+            bars = self.exchange.fetch_ohlcv(self.symbol, timeframe=self.timeframe, limit=self.limit)
             df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
             return df
         except Exception as e:
-            print(f"Error fetching data: {e}")
-            self._log_signal(f"Data fetch error: {str(e)}")
+            self._log_signal(f"Fetch error: {e}")
             return self._generate_sample_data()
 
     def _generate_sample_data(self):
-    """Generate sample data for backtesting"""
-    print("Generating sample data for backtesting")
-    self._log_signal("Using generated sample data")
-    
-    date_rng = pd.date_range(end=datetime.now(), periods=self.limit, freq=self.timeframe)
-    base_price = np.random.uniform(0.05, 0.15)
-    price_series = base_price * (1 + np.cumsum(np.random.randn(self.limit) * 0.002))
-    
-    df = pd.DataFrame({
-        'timestamp': date_rng,
-        'open': price_series * 0.998,
-        'high': price_series * 1.002,
-        'low': price_series * 0.995,
-        'close': price_series,
-        'volume': np.random.uniform(1000000, 5000000, size=self.limit)
-    })
-    return df
+        self._log_signal("Using generated sample data")
+        freq_map = {"1h": "H", "1d": "D", "1w": "W"}
+        freq = freq_map.get(self.timeframe, "H")
+        date_rng = pd.date_range(end=datetime.now(), periods=self.limit, freq=freq)
+        base = np.random.uniform(0.05, 0.15)
+        price = base * (1 + np.cumsum(np.random.randn(self.limit) * 0.002))
+        df = pd.DataFrame({
+            'timestamp': date_rng,
+            'open': price * 0.998,
+            'high': price * 1.002,
+            'low': price * 0.995,
+            'close': price,
+            'volume': np.random.uniform(1e6, 5e6, self.limit)
+        })
+        return df
 
     def apply_indicators(self, df):
-        # Moving Averages
-        df['ma20'] = df['close'].rolling(window=20).mean()
-        df['ma200'] = df['close'].rolling(window=200).mean()
-
-        # Bollinger Bands
-        bb = BollingerBands(close=df['close'], window=20, window_dev=2)
+        df['ma20'] = df['close'].rolling(20).mean()
+        df['ma200'] = df['close'].rolling(200).mean()
+        bb = BollingerBands(close=df['close'])
         df['bb_upper'] = bb.bollinger_hband()
         df['bb_lower'] = bb.bollinger_lband()
-
-        # MACD
         macd = MACD(close=df['close'])
         df['macd'] = macd.macd()
         df['macd_signal'] = macd.macd_signal()
-
-        # RSI
         rsi = RSIIndicator(close=df['close'])
         df['rsi'] = rsi.rsi()
-
-        # Stochastic RSI
         stoch = StochasticOscillator(high=df['high'], low=df['low'], close=df['close'])
         df['stoch_rsi'] = stoch.stoch()
-
         return df
 
     def log_trade(self, trade_type, price, amount, reason):
-        """Log a trade to the trades CSV file"""
         timestamp = datetime.utcnow().isoformat()
         mode = "DEMO" if self.demo_mode else "LIVE"
-        log_line = f"{timestamp},{mode},{trade_type},{price:.8f},{amount:.8f},{reason}\n"
-        
-        try:
-            with open(self.trades_file, 'a') as f:
-                f.write(log_line)
-            self._log_signal(f"Trade executed: {trade_type} {amount:.4f} {self.symbol} at {price:.8f}")
-        except Exception as e:
-            print(f"Failed to log trade: {e}")
+        with open(self.trades_file, 'a') as f:
+            f.write(f"{timestamp},{mode},{trade_type},{price:.8f},{amount:.8f},{reason}\n")
+        self._log_signal(f"Trade {trade_type} at {price:.4f} | {reason}")
 
     def execute_trade(self, trade_type, price, amount, reason):
-        """Execute a trade (or simulate in demo mode)"""
-        # Format the message
-        mode = "DEMO" if self.demo_mode else "LIVE"
-        msg = f"[{mode}] {trade_type} {amount:.4f} {self.symbol} at {price:.8f} | Reason: {reason}"
-        
-        # Output to console
+        msg = f"[{'DEMO' if self.demo_mode else 'LIVE'}] {trade_type} {amount:.4f} {self.symbol} @ {price:.4f} | {reason}"
         print(msg)
-        
-        # Send to Telegram
         self.send_telegram(msg)
-        
-        # Log the trade
         self.log_trade(trade_type, price, amount, reason)
 
     def run_strategy(self, df):
-        """Run the trading strategy on the provided data"""
         for i in range(200, len(df)):
             row = df.iloc[i]
             price = row['close']
 
             if not self.in_position:
-                # Buy conditions
                 if (price < row['bb_lower'] and 
                     row['macd'] > row['macd_signal'] and 
                     row['rsi'] < 30 and 
@@ -209,45 +160,42 @@ class TradingBot:
                     amount = self.trade_usd / price
                     self.execute_trade("BUY", price, amount, "Strategy Triggered")
                     self.in_position = True
-                    self._log_signal("Entered position")
-            
             else:
-                # Exit conditions
                 if price <= self.entry_price * (1 - self.stop_loss_pct):
-                    # Stop loss hit
-                    self.execute_trade("SELL", price, self.trade_usd / self.entry_price, "Stop Loss Hit")
+                    self.execute_trade("SELL", price, self.trade_usd / self.entry_price, "Stop Loss")
                     self.in_position = False
-                    self._log_signal("Exited position (Stop Loss)")
-                
-                elif price >= self.entry_price * (1 + np.random.uniform(
-                    self.take_profit_min_pct, self.take_profit_max_pct)):
-                    
-                    # Take profit hit
-                    self.execute_trade("SELL", price, self.trade_usd / self.entry_price, "Take Profit Hit")
+                elif price >= self.entry_price * (1 + np.random.uniform(self.take_profit_min_pct, self.take_profit_max_pct)):
+                    self.execute_trade("SELL", price, self.trade_usd / self.entry_price, "Take Profit")
                     self.in_position = False
-                    self._log_signal("Exited position (Take Profit)")
 
     def run(self):
-        """Main execution method"""
-        self._log_signal(f"Starting {'DEMO' if self.demo_mode else 'LIVE'} trading session")
-        
+        self._log_signal(f"Running {self.strategy} strategy on {self.timeframe} timeframe")
         try:
-            # Fetch and process data
             df = self.fetch_data()
             df = self.apply_indicators(df)
-            
-            # Run strategy
             self.run_strategy(df)
-            
         except Exception as e:
-            self._log_signal(f"Critical error: {str(e)}")
-            print(f"Error in main execution: {e}")
+            self._log_signal(f"Execution error: {e}")
         finally:
-            self._log_signal("Trading session ended")
+            self._log_signal("Session ended")
 
+# === Main Entry Point ===
 if __name__ == "__main__":
-    try:
-        bot = TradingBot()
-        bot.run()
-    except Exception as e:
-        print(f"Failed to initialize bot: {e}")
+    parser = argparse.ArgumentParser(description="Trading bot runner")
+    parser.add_argument("--strategy", type=str, default="MACD", help="Trading strategy (e.g., MACD)")
+    parser.add_argument("--timeframe", type=str, default="1h", help="Timeframe (1h, 1d, 1w)")
+    parser.add_argument("--balance", type=float, default=20, help="USDT balance to trade")
+    parser.add_argument("--wallet", type=str, required=True, help="Wallet address")
+    parser.add_argument("--signature", type=str, required=True, help="Wallet signature")
+    parser.add_argument("--threshold", type=float, default=50.0, help="Signal threshold")
+    args = parser.parse_args()
+
+    bot = TradingBot(
+        strategy=args.strategy,
+        timeframe=args.timeframe,
+        balance=args.balance,
+        wallet=args.wallet,
+        signature=args.signature,
+        threshold=args.threshold
+    )
+    bot.run()

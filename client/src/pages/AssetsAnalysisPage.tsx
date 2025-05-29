@@ -44,6 +44,7 @@ type APIResponse = {
 
 const AssetsAnalysisPage: React.FC = () => {
   const [symbol, setSymbol] = useState<string>('BTCUSDT');
+  const [interval, setIntervalValue] = useState<'hourly' | 'daily' | 'weekly'>('hourly');
   const [candles, setCandles] = useState<Candle[]>([]);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,7 +55,7 @@ const AssetsAnalysisPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/trade/candlestick?symbol=${symbol}`);
+      const res = await fetch(`/api/analysis/${symbol}?interval=${interval}`);
       if (!res.ok) throw new Error(`Fetch error: ${res.statusText}`);
 
       const data: APIResponse = await res.json();
@@ -73,7 +74,7 @@ const AssetsAnalysisPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [symbol]);
+  }, [symbol, interval]);
 
   useEffect(() => {
     fetchChartData();
@@ -141,6 +142,22 @@ const AssetsAnalysisPage: React.FC = () => {
           </select>
         </div>
 
+        <div className="flex justify-center gap-4 mt-2">
+          {(['hourly', 'daily', 'weekly'] as const).map((i) => (
+            <button
+              key={i}
+              className={`px-4 py-2 rounded-lg font-semibold border-2 ${
+                interval === i
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-black border-gray-300 hover:bg-gray-100'
+              }`}
+              onClick={() => setIntervalValue(i)}
+            >
+              {i.charAt(0).toUpperCase() + i.slice(1)}
+            </button>
+          ))}
+        </div>
+
         <div className="w-full overflow-x-auto min-h-[300px] flex justify-center items-center">
           {loading ? (
             <p>Loading chart data...</p>
@@ -162,4 +179,3 @@ const AssetsAnalysisPage: React.FC = () => {
 };
 
 export default AssetsAnalysisPage;
-

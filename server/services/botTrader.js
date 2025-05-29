@@ -1,9 +1,15 @@
 const axios = require('axios');
 const crypto = require('crypto');
-const walletService = require('./walletService'); // updated wallet service
+const walletService = require('./walletService');
 
-const HYPERLIQUID_API_URL = 'https://api.hyperliquid.xyz/futures/order'; // example
+const HYPERLIQUID_API_URL = process.env.HYPERLIQUID_API_URL || 'https://api.hyperliquid.xyz/futures/order';
 
+/**
+ * Create HMAC SHA256 signature
+ * @param {object} payload 
+ * @param {string} secret 
+ * @returns {string}
+ */
 function createSignature(payload, secret) {
   const message = JSON.stringify(payload);
   return crypto.createHmac('sha256', secret).update(message).digest('hex');
@@ -26,6 +32,9 @@ async function getWalletUsdtBalance(walletAddress, chain = 'eth') {
   }
 }
 
+/**
+ * Simulate order for demo mode
+ */
 function simulateOrder(symbol, side, quantity, price) {
   return {
     symbol,
@@ -42,9 +51,13 @@ function simulateOrder(symbol, side, quantity, price) {
   };
 }
 
+/**
+ * Get current price for symbol from Hyperliquid market API
+ */
 async function getCurrentPrice(symbol) {
   try {
-    const response = await axios.get(`https://api.hyperliquid.xyz/markets/${symbol}/ticker`);
+    const baseUrl = process.env.HYPERLIQUID_API_BASE_URL || 'https://api.hyperliquid.xyz/markets';
+    const response = await axios.get(`${baseUrl}/${symbol}/ticker`);
     return parseFloat(response.data.price);
   } catch (err) {
     console.error('Error fetching current price:', err.message);

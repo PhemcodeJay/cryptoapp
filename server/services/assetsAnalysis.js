@@ -1,39 +1,29 @@
 const axios = require('axios');
 
-// --- Indicator helpers (unchanged) ---
+// === Indicator Helpers ===
 
 function calculateSMA(data, window) {
-  const sma = [];
-  for (let i = 0; i < data.length; i++) {
-    if (i < window - 1) {
-      sma.push(null);
-      continue;
-    }
-    const windowSlice = data.slice(i - window + 1, i + 1);
-    const sum = windowSlice.reduce((acc, val) => acc + val, 0);
-    sma.push(sum / window);
-  }
-  return sma;
+  return data.map((_, i) => {
+    if (i < window - 1) return null;
+    const slice = data.slice(i - window + 1, i + 1);
+    const sum = slice.reduce((a, b) => a + b, 0);
+    return sum / window;
+  });
 }
 
 function calculateStdDev(data, window) {
-  const stddev = [];
-  for (let i = 0; i < data.length; i++) {
-    if (i < window - 1) {
-      stddev.push(null);
-      continue;
-    }
-    const windowSlice = data.slice(i - window + 1, i + 1);
-    const mean = windowSlice.reduce((a, b) => a + b, 0) / window;
-    const variance = windowSlice.reduce((a, b) => a + (b - mean) ** 2, 0) / window;
-    stddev.push(Math.sqrt(variance));
-  }
-  return stddev;
+  return data.map((_, i) => {
+    if (i < window - 1) return null;
+    const slice = data.slice(i - window + 1, i + 1);
+    const mean = slice.reduce((a, b) => a + b, 0) / window;
+    const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / window;
+    return Math.sqrt(variance);
+  });
 }
 
 function calculateEMA(data, window) {
-  const ema = [];
   const k = 2 / (window + 1);
+  const ema = Array(data.length).fill(null);
   let prevEma = data.slice(0, window).reduce((a, b) => a + b, 0) / window;
   ema[window - 1] = prevEma;
 
@@ -42,7 +32,7 @@ function calculateEMA(data, window) {
     ema[i] = currentEma;
     prevEma = currentEma;
   }
-  for (let i = 0; i < window - 1; i++) ema[i] = null;
+
   return ema;
 }
 
@@ -50,13 +40,12 @@ function calculateMACD(data, fast = 12, slow = 26, signal = 9) {
   const emaFast = calculateEMA(data, fast);
   const emaSlow = calculateEMA(data, slow);
 
-  const macdLine = data.map((_, i) => {
-    if (emaFast[i] === null || emaSlow[i] === null) return null;
-    return emaFast[i] - emaSlow[i];
-  });
+  const macdLine = data.map((_, i) =>
+    emaFast[i] !== null && emaSlow[i] !== null ? emaFast[i] - emaSlow[i] : null
+  );
 
-  const filteredMacdLine = macdLine.filter(v => v !== null);
-  const signalLinePartial = calculateEMA(filteredMacdLine, signal);
+  const validMacdLine = macdLine.filter(v => v !== null);
+  const signalLinePartial = calculateEMA(validMacdLine, signal);
 
   const signalLine = [];
   let sigIdx = 0;
@@ -69,16 +58,16 @@ function calculateMACD(data, fast = 12, slow = 26, signal = 9) {
     }
   }
 
-  const histogram = macdLine.map((v, i) => (v !== null && signalLine[i] !== null) ? v - signalLine[i] : null);
+  const histogram = macdLine.map((v, i) =>
+    v !== null && signalLine[i] !== null ? v - signalLine[i] : null
+  );
 
   return { macdLine, signalLine, histogram };
 }
 
 function calculateRSI(data, window = 14) {
-  const deltas = [];
-  for (let i = 1; i < data.length; i++) {
-    deltas.push(data[i] - data[i - 1]);
-  }
+  const rsi = Array(data.length).fill(null);
+  const deltas = data.slice(1).map((v, i) => v - data[i]);
 
   let gains = 0, losses = 0;
   for (let i = 0; i < window; i++) {
@@ -88,55 +77,38 @@ function calculateRSI(data, window = 14) {
 
   let avgGain = gains / window;
   let avgLoss = losses / window;
-
-  const rsi = [];
   rsi[window] = 100 - (100 / (1 + avgGain / avgLoss));
 
   for (let i = window + 1; i < data.length; i++) {
     const delta = deltas[i - 1];
     if (delta >= 0) {
-      avgGain = (avgGain * (window - 1) + delta) / window;
+      avgGain = ((avgGain * (window - 1)) + delta) / window;
       avgLoss = (avgLoss * (window - 1)) / window;
     } else {
       avgGain = (avgGain * (window - 1)) / window;
-      avgLoss = (avgLoss * (window - 1) + Math.abs(delta)) / window;
+      avgLoss = ((avgLoss * (window - 1)) + Math.abs(delta)) / window;
     }
-    rsi[i] = 100 - (100 / (1 + avgGain / avgLoss));
-  }
 
-  for (let i = 0; i < window; i++) rsi[i] = null;
+    rsi[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+  }
 
   return rsi;
 }
 
 function calculateStochasticRSI(rsi, window = 14) {
-  const stochasticRsi = [];
-
-  for (let i = 0; i < rsi.length; i++) {
-    if (i < window - 1 || rsi[i] === null) {
-      stochasticRsi.push(null);
-      continue;
-    }
-    const rsiSlice = rsi.slice(i - window + 1, i + 1).filter(v => v !== null);
-    const minRsi = Math.min(...rsiSlice);
-    const maxRsi = Math.max(...rsiSlice);
-    if (maxRsi - minRsi === 0) {
-      stochasticRsi.push(0);
-    } else {
-      stochasticRsi.push((rsi[i] - minRsi) / (maxRsi - minRsi));
-    }
-  }
-
-  return stochasticRsi;
+  return rsi.map((v, i) => {
+    if (i < window - 1 || v === null) return null;
+    const slice = rsi.slice(i - window + 1, i + 1).filter(x => x !== null);
+    const min = Math.min(...slice);
+    const max = Math.max(...slice);
+    return max - min === 0 ? 0 : (v - min) / (max - min);
+  });
 }
 
-// --- Main analyze function with requested timeframes and indicators ---
+// === Main Analyzer ===
 
-exports.analyze = async (symbol) => {
-  // Set required intervals: 4hr, 1 day, 1 week
-  const intervals = ['4h', '1d', '1w'];
-  const limit = 200; // Number of candles to fetch
-
+exports.analyze = async (symbol, intervals = ['4h', '1d', '1w']) => {
+  const limit = 200;
   const results = {};
 
   for (const interval of intervals) {
@@ -145,55 +117,51 @@ exports.analyze = async (symbol) => {
         params: { symbol, interval, limit }
       });
 
-      const candles = res.data.map(candle => ({
-        openTime: candle[0],
-        open: parseFloat(candle[1]),
-        high: parseFloat(candle[2]),
-        low: parseFloat(candle[3]),
-        close: parseFloat(candle[4]),
-        volume: parseFloat(candle[5]),
+      const candles = res.data.map(c => ({
+        openTime: c[0],
+        open: parseFloat(c[1]),
+        high: parseFloat(c[2]),
+        low: parseFloat(c[3]),
+        close: parseFloat(c[4]),
+        volume: parseFloat(c[5])
       }));
 
       const closes = candles.map(c => c.close);
       const volumes = candles.map(c => c.volume);
 
-      // Calculate indicators
+      // Indicators
       const ma20 = calculateSMA(closes, 20);
       const ma200 = calculateSMA(closes, 200);
       const stddev20 = calculateStdDev(closes, 20);
-
-      const bollingerBands = candles.map((_, i) => {
-        if (ma20[i] === null || stddev20[i] === null) return { upper: null, middle: null, lower: null };
-        return {
-          upper: ma20[i] + 2 * stddev20[i],
-          middle: ma20[i],
-          lower: ma20[i] - 2 * stddev20[i],
-        };
-      });
+      const bollinger = candles.map((_, i) => ({
+        upper: ma20[i] !== null && stddev20[i] !== null ? ma20[i] + 2 * stddev20[i] : null,
+        middle: ma20[i],
+        lower: ma20[i] !== null && stddev20[i] !== null ? ma20[i] - 2 * stddev20[i] : null
+      }));
 
       const macd = calculateMACD(closes);
       const rsi = calculateRSI(closes);
       const stochRsi = calculateStochasticRSI(rsi);
       const volumeSma = calculateSMA(volumes, 14);
 
-      // Attach indicators to candles
-      for (let i = 0; i < candles.length; i++) {
-        candles[i].ma20 = ma20[i];
-        candles[i].ma200 = ma200[i];
-        candles[i].bollingerUpper = bollingerBands[i].upper;
-        candles[i].bollingerMiddle = bollingerBands[i].middle;
-        candles[i].bollingerLower = bollingerBands[i].lower;
-        candles[i].macd = macd.macdLine[i];
-        candles[i].macdSignal = macd.signalLine[i];
-        candles[i].macdHist = macd.histogram[i];
-        candles[i].rsi = rsi[i];
-        candles[i].stochRsi = stochRsi[i];
-        candles[i].volumeSma = volumeSma[i];
-      }
+      // Merge indicators into candles
+      candles.forEach((c, i) => {
+        c.ma20 = ma20[i];
+        c.ma200 = ma200[i];
+        c.bollingerUpper = bollinger[i].upper;
+        c.bollingerMiddle = bollinger[i].middle;
+        c.bollingerLower = bollinger[i].lower;
+        c.macd = macd.macdLine[i];
+        c.macdSignal = macd.signalLine[i];
+        c.macdHist = macd.histogram[i];
+        c.rsi = rsi[i];
+        c.stochRsi = stochRsi[i];
+        c.volumeSma = volumeSma[i];
+      });
 
       results[interval] = candles;
-    } catch (error) {
-      console.error(`Error fetching candles for ${symbol} ${interval}:`, error.message);
+    } catch (err) {
+      console.error(`Error analyzing ${symbol} at ${interval}: ${err.message}`);
       results[interval] = null;
     }
   }

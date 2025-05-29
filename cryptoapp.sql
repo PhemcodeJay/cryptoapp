@@ -1,5 +1,6 @@
 -- -----------------------------------------------------
--- Schema for Web3 Crypto Trading App (Wallet Connect Users)
+-- Schema for Web3 Crypto Trading App (Hyperliquid Support)
+-- Supports MetaMask, Trust Wallet, Hyperliquid Futures
 -- MySQL version: 8+
 -- Charset: utf8mb4
 -- Collation: utf8mb4_general_ci
@@ -50,13 +51,14 @@ CREATE TABLE `wallets` (
 CREATE TABLE `bots` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT UNSIGNED NOT NULL,
-  `exchange` VARCHAR(50) NOT NULL DEFAULT 'binance_futures',
+  `exchange` VARCHAR(50) NOT NULL DEFAULT 'hyperliquid',
   `symbol` VARCHAR(20) NOT NULL,
   `timeframe` VARCHAR(10) NOT NULL DEFAULT '1h',
   `strategy` VARCHAR(100) NOT NULL DEFAULT 'ma_macd_rsi_stoch_vol',
   `min_investment` DECIMAL(10,2) NOT NULL DEFAULT 5.00,
   `take_profit_pct` DECIMAL(5,2) NOT NULL DEFAULT 50.00,
   `stop_loss_pct` DECIMAL(5,2) NOT NULL DEFAULT 10.00,
+  `leverage` INT NOT NULL DEFAULT 10,
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -76,7 +78,10 @@ CREATE TABLE `bot_trades` (
   `entry_price` DECIMAL(18,8) NOT NULL,
   `exit_price` DECIMAL(18,8) DEFAULT NULL,
   `quantity` DECIMAL(18,8) NOT NULL,
+  `leverage` INT NOT NULL DEFAULT 10,
+  `liquidation_price` DECIMAL(18,8) DEFAULT NULL,
   `profit_usdt` DECIMAL(12,4) DEFAULT NULL,
+  `pnl_pct` DECIMAL(6,2) DEFAULT NULL,
   `status` ENUM('open', 'closed') NOT NULL DEFAULT 'open',
   `opened_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `closed_at` DATETIME DEFAULT NULL,
@@ -120,6 +125,29 @@ CREATE TABLE `indicator_values` (
   CONSTRAINT `fk_indicator_bot`
     FOREIGN KEY (`bot_id`) REFERENCES `bots` (`id`) ON DELETE CASCADE,
   UNIQUE KEY `unique_indicator` (`bot_id`, `symbol`, `timeframe`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
+-- Table `asset_analysis`
+-- -----------------------------------------------------
+CREATE TABLE `asset_analysis` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `wallet_id` INT UNSIGNED NOT NULL,
+  `symbol` VARCHAR(50) NOT NULL,
+  `timeframe` VARCHAR(10) NOT NULL,
+  `rsi` DECIMAL(8,4),
+  `macd` DECIMAL(12,6),
+  `stoch_rsi` DECIMAL(8,4),
+  `bollinger_upper` DECIMAL(18,8),
+  `bollinger_lower` DECIMAL(18,8),
+  `moving_avg_20` DECIMAL(18,8),
+  `moving_avg_200` DECIMAL(18,8),
+  `volume_sma` DECIMAL(18,4),
+  `signal_generated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_asset_analysis_wallet`
+    FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`) ON DELETE CASCADE,
+  INDEX `idx_wallet_symbol_timeframe` (`wallet_id`, `symbol`, `timeframe`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
