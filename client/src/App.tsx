@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -11,12 +10,14 @@ import DashboardPage from './pages/DashboardPage';
 import TradingBotPage from './pages/TradingBotPage';
 import AssetsAnalysisPage from './pages/AssetsAnalysisPage';
 import LogoutPage from './pages/LogoutPage';
+import AboutPage from './pages/aboutPage'; // <-- Add this import
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<IndexPage />} />
+        <Route path="/about" element={<AboutPage />} /> {/* <-- Add this route */}
         <Route path="/wallet-connect" element={<WalletConnectPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/trading-bot" element={<TradingBotPage />} />

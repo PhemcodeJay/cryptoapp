@@ -1,95 +1,112 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const NavigationButtons = () => (
+const NavigationButtons: React.FC = () => (
   <div className="flex flex-wrap justify-center gap-4 mb-10">
-    <Link to="/wallet-connect" className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow transition duration-200">
+    <Link
+      to="/wallet-connect"
+      className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
       🔐 Connect Wallet
     </Link>
-    <Link to="/dashboard" className="bg-green-500 hover:bg-green-400 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200">
-      📊 View Dashboard
+    <Link
+      to="/portfolio"
+      className="bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
+      📊 Portfolio Overview
     </Link>
-    <Link to="/trading-bot" className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200">
+    <Link
+      to="/asset-analysis"
+      className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
+      📈 Asset Analysis
+    </Link>
+    <Link
+      to="/trading-bot"
+      className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
       🤖 Trading Bot
     </Link>
-    <Link to="/assets-analysis" className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200">
-      📈 Assets Analysis
+    <Link
+      to="/about"
+      className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
+      🤖 About
     </Link>
-    <Link to="/logout" className="bg-red-500 hover:bg-red-400 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200">
+    <Link
+      to="/logout"
+      className="bg-red-500 hover:bg-red-400 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
+    >
       🚪 Logout
     </Link>
   </div>
 );
 
-const HeroSection = () => (
-  <section className="hero-area relative py-20 text-center text-white bg-gradient-to-r from-gray-900 to-black">
-    {/* Background shape with absolute path */}
-    <img
-      className="absolute top-0 left-0 w-full h-full object-cover opacity-20"
-      src="/assets/images/hero/hero-shape.svg"
-      alt="Background Shape"
-    />
-    <div className="container mx-auto relative z-10">
-      <h4 className="text-xl mb-4">Start Investing & Earn Money</h4>
-      <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-        Say goodbye to <br />
-        idle{' '}
-        <span className="inline-flex items-center">
-          <img
-            className="inline w-6 h-6 mx-1"
-            src="/assets/images/hero/text-shape.svg"
-            alt="text-shape"
-          />
-          money.
-        </span>
+const HeroSection: React.FC = () => (
+  <section className="relative py-24 bg-gradient-to-r from-indigo-900 to-blue-900 text-white text-center">
+    <div className="container mx-auto relative z-10 px-6">
+      <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+        CryptoPilot <br />
+        <span className="text-yellow-400">Automated Web3 Wallet Connect, Asset Analysis, and Trading</span>
       </h1>
-      <p className="max-w-xl mx-auto mb-6">
-        Invest your spare change in Bitcoin and save with crypto to earn interest in real time.
+      <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+        Your Web3 Wallet <br />
+        <span className="text-yellow-400">Portfolio & Trading Hub</span>
+      </h1>
+      <p className="max-w-3xl mx-auto text-lg md:text-xl mb-8">
+        Connect your Web3 wallet to track your assets in real-time, perform in-depth market analysis,
+        and automate trades with our advanced trading bot running on Hyperliquid — optimized hourly, daily, and weekly.
       </p>
-      <Link
-        to="/about-us"
-        className="btn bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl shadow"
-      >
-        Discover More
-      </Link>
     </div>
   </section>
 );
 
-const Features = () => {
-  const features = [
-    { icon: 'feature-icon-1.png', title: 'Instant Exchange' },
-    { icon: 'feature-icon-2.png', title: 'Safe & Secure' },
-    { icon: 'feature-icon-3.png', title: 'Instant Trading' },
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const Features: React.FC = () => {
+  const features: Feature[] = [
+    {
+      icon: 'wallet.svg',
+      title: 'Secure Web3 Wallet Integration',
+      description:
+        'Easily connect your Ethereum and other Web3 wallets with robust security and full privacy controls.',
+    },
+    {
+      icon: 'analytics.svg',
+      title: 'Advanced Asset Analysis',
+      description:
+        'Gain detailed insights on your holdings with real-time and historical performance charts, updated hourly, daily, and weekly.',
+    },
+    {
+      icon: 'bot.svg',
+      title: 'Automated Trading Bot',
+      description:
+        'Configure your trading strategies and let our bot execute trades 24/7 on Hyperliquid with precision and speed.',
+    },
   ];
 
   return (
-    <section className="feature section py-20 bg-white text-gray-800">
-      <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <h3 className="text-lg text-indigo-600 mb-2">Why choose us</h3>
-          <h2 className="text-3xl font-bold mb-4">Our Features</h2>
-          <p className="text-gray-600">
-            There are many variations of passages of Lorem Ipsum available, but the majority have
-            suffered alteration.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map(({ icon, title }) => (
+    <section className="py-20 bg-gray-900 text-white">
+      <div className="container mx-auto px-6">
+        <h2 className="text-4xl font-bold text-center mb-12">Core Features</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {features.map(({ icon, title, description }) => (
             <div
               key={title}
-              className="bg-gray-50 p-6 rounded-lg shadow hover:shadow-lg transition"
+              className="bg-gray-800 rounded-xl p-8 flex flex-col items-center text-center shadow-lg hover:shadow-2xl transition"
             >
               <img
-                src={`/assets/images/features/${icon}`}
+                src={`/assets/icons/${icon}`}
                 alt={title}
-                className="mb-4 w-16 h-16"
+                className="w-20 h-20 mb-6"
+                loading="lazy"
               />
-              <h4 className="text-xl font-semibold mb-2">{title}</h4>
-              <p>
-                Invest in Bitcoin on the regular or save with one of the highest interest rates on
-                the market.
-              </p>
+              <h3 className="text-2xl font-semibold mb-4">{title}</h3>
+              <p className="text-gray-300">{description}</p>
             </div>
           ))}
         </div>
@@ -98,108 +115,110 @@ const Features = () => {
   );
 };
 
-const CallToAction = () => (
-  <section className="call-action py-16 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-center">
-    <div className="container mx-auto">
-      <h2 className="text-3xl font-bold">
-        You're using the free <br />
-        <span className="text-yellow-300">Lite version of CryptoPilot</span>
-      </h2>
-      <p className="mt-4">Purchase the full version to get all features and commercial license.</p>
-      <div className="mt-6">
-        <a
-          href="#"
-          className="btn bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-xl"
-        >
-          Buy Pro Version
-        </a>
-      </div>
-    </div>
-  </section>
-);
+interface BotSchedule {
+  title: string;
+  description: string;
+  icon: string;
+}
 
-const Footer = () => (
-  <footer className="footer section bg-gray-900 text-white py-12">
-    <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <div>
-        <img
-          src="/assets/images/logo/white-logo.svg"
-          alt="Logo"
-          className="mb-4"
-        />
-        <p>Making the world a better place through constructing elegant hierarchies.</p>
-        <div className="mt-4 flex gap-3">
-          {[
-            'facebook-filled',
-            'instagram',
-            'twitter-original',
-            'linkedin-original',
-            'pinterest',
-            'youtube',
-          ].map((name) => (
-            <a key={name} href="#">
-              <i className={`lni lni-${name}`} />
-            </a>
+const TradingBotSchedule: React.FC = () => {
+  const schedules: BotSchedule[] = [
+    {
+      title: 'Hourly',
+      description:
+        'Quick reactions to market changes using optimized scalping and momentum strategies.',
+      icon: 'hourly.svg',
+    },
+    {
+      title: 'Daily',
+      description:
+        'Comprehensive analysis of daily market trends to execute balanced trading plans with risk management.',
+      icon: 'daily.svg',
+    },
+    {
+      title: 'Weekly',
+      description:
+        'Long-term portfolio adjustments and trend following based on weekly aggregated data.',
+      icon: 'weekly.svg',
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-gradient-to-r from-blue-800 to-indigo-900 text-white text-center">
+      <div className="container mx-auto px-6 max-w-4xl">
+        <h2 className="text-4xl font-bold mb-8">Trading Bot Schedule</h2>
+        <p className="mb-12 text-lg max-w-3xl mx-auto">
+          Our Hyperliquid-powered trading bot operates at multiple intervals to maximize your gains:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {schedules.map(({ title, description, icon }) => (
+            <div
+              key={title}
+              className="bg-indigo-700 rounded-lg p-6 shadow-lg hover:shadow-2xl transition"
+            >
+              <img
+                src={`/assets/icons/${icon}`}
+                alt={title}
+                className="w-16 h-16 mx-auto mb-4"
+                loading="lazy"
+              />
+              <h3 className="text-2xl font-semibold mb-2">{title}</h3>
+              <p className="text-gray-200">{description}</p>
+            </div>
           ))}
         </div>
       </div>
+    </section>
+  );
+};
+
+const Footer: React.FC = () => (
+  <footer className="bg-gray-900 text-gray-400 py-12 mt-20">
+    <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
       <div>
-        <h3 className="text-lg font-bold mb-3">Solutions</h3>
+        <h3 className="text-white text-xl font-bold mb-4">CryptoPilot</h3>
+        <p>
+          Empowering Web3 users with portfolio insights, asset analysis, and automated trading on
+          Hyperliquid.
+        </p>
+      </div>
+      <div>
+        <h4 className="text-white font-semibold mb-4">Quick Links</h4>
         <ul>
-          {['Marketing', 'Analytics', 'Commerce', 'Insights'].map((link) => (
-            <li key={link}>
-              <a href="#" className="hover:underline">
-                {link}
-              </a>
+          {[
+            { label: 'Connect Wallet', path: '/wallet-connect' },
+            { label: 'Portfolio', path: '/portfolio' },
+            { label: 'Asset Analysis', path: '/asset-analysis' },
+            { label: 'Trading Bot', path: '/trading-bot' },
+          ].map(({ label, path }) => (
+            <li key={path}>
+              <Link to={path} className="hover:text-white">
+                {label}
+              </Link>
             </li>
           ))}
         </ul>
       </div>
       <div>
-        <h3 className="text-lg font-bold mb-3">Support</h3>
-        <ul>
-          {['Pricing', 'Documentation', 'Guides', 'API Status'].map((link) => (
-            <li key={link}>
-              <a href="#" className="hover:underline">
-                {link}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h3 className="text-lg font-bold mb-3">Subscribe</h3>
-        <p>Subscribe to our newsletter for the latest updates</p>
-        <form className="mt-4 flex">
-          <input
-            type="email"
-            placeholder="Email address"
-            className="p-2 rounded-l bg-white text-black flex-1"
-          />
-          <button type="submit" className="p-2 bg-yellow-400 rounded-r">
-            <i className="lni lni-envelope" />
-          </button>
-        </form>
+        <h4 className="text-white font-semibold mb-4">Contact</h4>
+        <p>Email: support@cryptopilot.io</p>
+        <p>Twitter: @CryptoPilot</p>
+        <p>Discord: CryptoPilot#1234</p>
       </div>
     </div>
-    <div className="text-center mt-10 text-sm border-t border-gray-700 pt-4">
-      <p>
-        © 2023 CryptoPilot - All Rights Reserved. Designed by{' '}
-        <a href="https://uideck.com/" className="text-indigo-300 hover:underline">
-          UIdeck
-        </a>
-      </p>
+    <div className="text-center mt-12 text-sm text-gray-600">
+      © 2025 CryptoPilot. All rights reserved.
     </div>
   </footer>
 );
 
 const IndexPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 text-white">
       <HeroSection />
       <NavigationButtons />
       <Features />
-      <CallToAction />
+      <TradingBotSchedule />
       <Footer />
     </div>
   );

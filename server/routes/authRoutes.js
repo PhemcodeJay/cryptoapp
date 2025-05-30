@@ -12,6 +12,7 @@ router.get('/dashboard', (req, res) => res.render('DashboardPage'));
 router.get('/portfolio', (req, res) => res.render('PortfolioPage'));
 router.get('/assets-analysis', (req, res) => res.render('AssetsAnalysisPage'));
 router.get('/trading-bot', (req, res) => res.render('TradingBotPage'));
+router.get('/about', (req, res) => res.render('aboutPage')); // ✅ New route added
 
 // Wallet connect / auth routes
 router.post('/request-nonce', authController.requestNonce);
