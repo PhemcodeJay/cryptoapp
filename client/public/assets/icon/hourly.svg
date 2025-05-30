@@ -1,0 +1,21 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f0f9ff"></rect>
+  
+  <!-- Wallet -->
+  <rect x="20" y="60" width="60" height="40" rx="8" fill="#60a5fa"></rect>
+  <circle cx="70" cy="80" r="6" fill="#eff6ff"></circle>
+
+  <!-- Bot Head -->
+  <circle cx="140" cy="60" r="25" fill="#3b82f6"></circle>
+  <circle cx="132" cy="55" r="4" fill="#f0f9ff"></circle>
+  <circle cx="148" cy="55" r="4" fill="#f0f9ff"></circle>
+  <rect x="130" y="65" width="20" height="4" rx="2" fill="#f0f9ff"></rect>
+
+  <!-- Bar Chart (animated) -->
+  <g transform="translate(60, 130)">
+    <rect x="0" y="0" width="15" height="0" fill="#2563eb">
+      <animate attributeName="height" from="0" to="60" dur="0.6s" fill="freeze"></animate>
+    </rect>
+    <text x="0" y="70" font-size="10" fill="#1e40af">Hourly</text>
+  </g>
+</svg>

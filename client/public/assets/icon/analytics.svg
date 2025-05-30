@@ -1,0 +1,24 @@
+<svg width="180" height="140" viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f9fafb"></rect>
+
+  <!-- Daily -->
+  <rect x="20" y="70" width="30" height="50" fill="#60a5fa">
+    <animate attributeName="height" from="0" to="50" dur="0.6s" fill="freeze"></animate>
+    <animate attributeName="y" from="120" to="70" dur="0.6s" fill="freeze"></animate>
+  </rect>
+  <text x="20" y="130" font-size="10" fill="#1e3a8a">Daily</text>
+
+  <!-- Hourly -->
+  <rect x="70" y="90" width="30" height="30" fill="#3b82f6">
+    <animate attributeName="height" from="0" to="30" dur="0.8s" fill="freeze"></animate>
+    <animate attributeName="y" from="120" to="90" dur="0.8s" fill="freeze"></animate>
+  </rect>
+  <text x="70" y="130" font-size="10" fill="#1e40af">Hourly</text>
+
+  <!-- Weekly -->
+  <rect x="120" y="50" width="30" height="70" fill="#1d4ed8">
+    <animate attributeName="height" from="0" to="70" dur="1s" fill="freeze"></animate>
+    <animate attributeName="y" from="120" to="50" dur="1s" fill="freeze"></animate>
+  </rect>
+  <text x="120" y="130" font-size="10" fill="#1e40af">Weekly</text>
+</svg>
