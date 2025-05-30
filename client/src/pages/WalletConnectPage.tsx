@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';  // import useNavigate
 import walletService from '../../services/walletService';
 
 const supportedChains = [
@@ -9,6 +10,7 @@ const supportedChains = [
 ];
 
 const WalletConnectPage: React.FC = () => {
+  const navigate = useNavigate();  // initialize navigate
   const [connecting, setConnecting] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [chain, setChain] = useState<string>('eth');
@@ -21,6 +23,8 @@ const WalletConnectPage: React.FC = () => {
       const response = await walletService.syncWallet(address, selectedChain);
       setMessage(response.message || 'Wallet synced successfully!');
       await fetchPortfolio(address, selectedChain);
+      // Redirect after successful sync
+      navigate('/dashboardpage');
     } catch (err: any) {
       console.error('Sync error:', err);
       setError(err.message || 'Sync failed');

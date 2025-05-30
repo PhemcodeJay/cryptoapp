@@ -50,11 +50,9 @@ const TradingBotPage: React.FC = () => {
     setStatus('⏳ Executing trade...');
 
     try {
-      // Mapping strategy/timeframe to symbol and side for demo purpose
-      // You may want to adjust this logic to your actual trading parameters
       const symbol = 'BTCUSDT'; // Could be dynamic later
       const side = strategy.toLowerCase() === 'sell' ? 'sell' : 'buy'; // Simplified
-      const quantity = threshold; // Use threshold as quantity for demo
+      const quantity = threshold;
 
       const tradeResult = await hyperliquidService.placeFuturesOrder({
         walletAddress: address,
@@ -78,46 +76,56 @@ const TradingBotPage: React.FC = () => {
   };
 
   return (
-    <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-white to-gray-100 text-gray-900'} min-h-screen p-8 flex flex-col max-w-3xl mx-auto`}>
+    <div className={`${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gradient-to-br from-white to-gray-100 text-gray-900'} min-h-screen p-8 flex flex-col max-w-4xl mx-auto`}>
       {/* Dark mode toggle */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mb-8">
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg transition font-semibold flex items-center space-x-2"
           aria-label="Toggle dark mode"
+          className="flex items-center space-x-2 rounded-lg bg-indigo-600 px-5 py-2 text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
-          {darkMode ? <span>☀️ Light Mode</span> : <span>🌙 Dark Mode</span>}
+          {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
         </button>
       </div>
 
-      <h1 className="text-4xl font-extrabold mb-8 text-center">🚀 Trading Bot Control Panel</h1>
+      <h1 className="text-5xl font-extrabold mb-10 text-center tracking-tight">
+        🚀 Trading Bot Control Panel
+      </h1>
 
       {/* Wallet address input */}
-      <label className="block mb-2 font-semibold text-lg" htmlFor="walletAddress">Wallet Address</label>
+      <label htmlFor="walletAddress" className="block text-lg font-semibold mb-2">
+        Wallet Address
+      </label>
       <input
         id="walletAddress"
         type="text"
+        placeholder="Enter your wallet address"
         value={address}
         onChange={(e) => setAddress(e.target.value)}
-        placeholder="Enter your wallet address"
-        className={`w-full p-4 rounded-xl border ${
-          darkMode ? 'border-gray-600 bg-gray-700 text-white focus:ring-blue-500' : 'border-gray-300 bg-white text-gray-900 focus:ring-indigo-500'
-        } mb-4 focus:outline-none focus:ring-2 transition`}
+        className={`w-full rounded-xl border px-5 py-4 mb-6 text-lg transition focus:outline-none focus:ring-2 ${
+          darkMode
+            ? 'border-gray-600 bg-gray-800 text-gray-100 focus:ring-indigo-500'
+            : 'border-gray-300 bg-white text-gray-900 focus:ring-indigo-600'
+        }`}
       />
 
-      <p className="text-right mb-6 font-medium">
+      <p className="text-right text-md font-medium mb-8">
         Wallet Balance: {walletBalance !== null ? `$${walletBalance.toFixed(2)}` : 'Loading...'}
       </p>
 
       {/* Strategy selector */}
-      <label className="block mb-2 font-semibold text-lg" htmlFor="strategy">Strategy</label>
+      <label htmlFor="strategy" className="block text-lg font-semibold mb-2">
+        Strategy
+      </label>
       <select
         id="strategy"
-        className={`w-full p-4 rounded-xl border mb-6 ${
-          darkMode ? 'border-gray-600 bg-gray-700 text-white focus:ring-blue-500' : 'border-gray-300 bg-white text-gray-900 focus:ring-indigo-500'
-        } transition focus:outline-none focus:ring-2`}
         value={strategy}
         onChange={(e) => setStrategy(e.target.value)}
+        className={`w-full rounded-xl border px-5 py-4 mb-8 text-lg transition focus:outline-none focus:ring-2 ${
+          darkMode
+            ? 'border-gray-600 bg-gray-800 text-gray-100 focus:ring-indigo-500'
+            : 'border-gray-300 bg-white text-gray-900 focus:ring-indigo-600'
+        }`}
       >
         <option value="MACD">MACD</option>
         <option value="RSI">RSI</option>
@@ -126,21 +134,20 @@ const TradingBotPage: React.FC = () => {
       </select>
 
       {/* Timeframe buttons */}
-      <label className="block mb-2 font-semibold text-lg">Timeframe</label>
-      <div className="flex gap-4 mb-6">
+      <label className="block text-lg font-semibold mb-2">Timeframe</label>
+      <div className="flex gap-4 mb-8">
         {(['hourly', 'daily', 'weekly'] as const).map((tf) => (
           <button
             key={tf}
             onClick={() => setTimeframe(tf)}
-            className={`flex-1 py-3 rounded-xl font-semibold border transition
-              ${
-                timeframe === tf
-                  ? 'bg-purple-600 text-white border-purple-700'
-                  : darkMode
-                  ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
-                  : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-200'
-              }`}
             type="button"
+            className={`flex-1 rounded-xl py-4 font-semibold transition focus:outline-none focus:ring-2 ${
+              timeframe === tf
+                ? 'bg-purple-700 text-white border border-purple-700 shadow-lg'
+                : darkMode
+                ? 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700'
+                : 'bg-white text-gray-900 border border-gray-300 hover:bg-gray-200'
+            }`}
           >
             {tf.charAt(0).toUpperCase() + tf.slice(1)}
           </button>
@@ -148,7 +155,9 @@ const TradingBotPage: React.FC = () => {
       </div>
 
       {/* Profit threshold input */}
-      <label className="block mb-2 font-semibold text-lg" htmlFor="threshold">Profit Threshold (%)</label>
+      <label htmlFor="threshold" className="block text-lg font-semibold mb-2">
+        Profit Threshold (%)
+      </label>
       <input
         id="threshold"
         type="number"
@@ -156,13 +165,15 @@ const TradingBotPage: React.FC = () => {
         max={100}
         value={threshold}
         onChange={(e) => setThreshold(Number(e.target.value))}
-        className={`w-full p-4 rounded-xl border mb-6 ${
-          darkMode ? 'border-gray-600 bg-gray-700 text-white focus:ring-pink-500' : 'border-gray-300 bg-white text-gray-900 focus:ring-pink-500'
-        } transition focus:outline-none focus:ring-2`}
+        className={`w-full rounded-xl border px-5 py-4 mb-8 text-lg transition focus:outline-none focus:ring-2 ${
+          darkMode
+            ? 'border-gray-600 bg-gray-800 text-gray-100 focus:ring-pink-500'
+            : 'border-gray-300 bg-white text-gray-900 focus:ring-pink-500'
+        }`}
       />
 
       {/* Bot enabled toggle */}
-      <div className="flex items-center mb-6 space-x-3">
+      <div className="flex items-center space-x-4 mb-10">
         <input
           id="enableBot"
           type="checkbox"
@@ -170,34 +181,62 @@ const TradingBotPage: React.FC = () => {
           onChange={() => setBotEnabled(!botEnabled)}
           className="h-6 w-6 rounded border-gray-300 text-green-600 focus:ring-green-500"
         />
-        <label htmlFor="enableBot" className="font-semibold text-lg select-none">Enable Bot</label>
+        <label htmlFor="enableBot" className="text-lg font-semibold select-none">
+          Enable Bot
+        </label>
       </div>
 
       {/* Preview box */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-blue-100 border-blue-300 text-blue-900'} p-6 rounded-xl border mb-8`}>
-        <h2 className="text-xl font-semibold mb-3">Preview</h2>
-        <p><strong>Strategy:</strong> {strategy}</p>
-        <p><strong>Timeframe:</strong> {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}</p>
-        <p><strong>Profit Target:</strong> {threshold}%</p>
-        <p><strong>Status:</strong> {botEnabled ? '✅ Enabled' : '❌ Disabled'}</p>
-      </div>
+      <section
+        className={`p-6 rounded-xl border mb-12 ${
+          darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-blue-50 border-blue-300 text-blue-900'
+        }`}
+      >
+        <h2 className="text-2xl font-semibold mb-4 border-b border-gray-300 pb-2">
+          Preview
+        </h2>
+        <ul className="space-y-2 text-lg">
+          <li>
+            <strong>Strategy:</strong> {strategy}
+          </li>
+          <li>
+            <strong>Timeframe:</strong> {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
+          </li>
+          <li>
+            <strong>Profit Target:</strong> {threshold}%
+          </li>
+          <li>
+            <strong>Status:</strong> {botEnabled ? '✅ Enabled' : '❌ Disabled'}
+          </li>
+        </ul>
+      </section>
 
       {/* Execute trade button */}
       <button
         onClick={handleTrade}
         disabled={isTrading}
-        className={`w-full py-4 rounded-xl font-bold text-lg text-white transition ${
+        className={`w-full rounded-xl py-5 font-bold text-xl text-white transition ${
           isTrading
-            ? 'opacity-50 cursor-not-allowed bg-gradient-to-r from-green-400 to-lime-400'
-            : 'bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600'
-        }`}
+            ? 'cursor-not-allowed opacity-60 bg-gradient-to-r from-green-400 to-lime-400'
+            : 'bg-gradient-to-r from-green-600 to-lime-600 hover:from-green-700 hover:to-lime-700'
+        } focus:outline-none focus:ring-4 focus:ring-green-400`}
       >
         {isTrading ? '⏳ Trading...' : '🚀 Execute Trade'}
       </button>
 
       {/* Status message */}
       {status && (
-        <p className={`mt-6 text-center font-medium ${status.startsWith('❌') ? 'text-red-600' : status.startsWith('⚠️') ? 'text-yellow-600' : 'text-green-600'}`}>
+        <p
+          className={`mt-8 text-center text-lg font-semibold ${
+            status.startsWith('❌')
+              ? 'text-red-600'
+              : status.startsWith('⚠️')
+              ? 'text-yellow-600'
+              : 'text-green-600'
+          }`}
+          role="alert"
+          aria-live="polite"
+        >
           {status}
         </p>
       )}
