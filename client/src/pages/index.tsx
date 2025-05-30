@@ -47,10 +47,10 @@ const HeroSection: React.FC = () => (
     <div className="container mx-auto relative z-10 px-6">
       <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
         CryptoPilot <br />
-        <span className="text-yellow-400">Automated Web3 Wallet Connect, Asset Analysis, and Trading</span>
+        <span className="text-yellow-400">Automated Asset Analysis and Trading</span>
       </h1>
       <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-        Your Web3 Wallet <br />
+        Web3 Wallet <br />
         <span className="text-yellow-400">Portfolio & Trading Hub</span>
       </h1>
       <p className="max-w-3xl mx-auto text-lg md:text-xl mb-8">
