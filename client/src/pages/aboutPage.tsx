@@ -7,7 +7,7 @@ const About: React.FC = () => {
       <section className="about_section layout_padding">
         <div className="container">
           <div className="heading_container">
-            <h2>About Cryptopilot</h2>
+            <h2>About CryptoPilot</h2>
           </div>
           <div className="box d-flex flex-wrap align-items-center">
             <div
@@ -15,8 +15,8 @@ const About: React.FC = () => {
               style={{ flex: "1 1 300px", maxWidth: 400 }}
             >
               <img
-                src="images/about-img.png"
-                alt="About Cryptopilot"
+                src="images/auto-img.png"
+                alt="About CryptoPilot"
                 className="img-fluid"
               />
             </div>
@@ -25,14 +25,14 @@ const About: React.FC = () => {
               style={{ flex: "1 1 300px", paddingLeft: 20 }}
             >
               <p>
-                Cryptopilot is an advanced crypto asset analytics platform that
+                CryptoPilot is an advanced crypto asset analytics platform that
                 leverages real-time wallet connect data to provide actionable
                 insights. Our platform monitors blockchain assets dynamically,
                 enabling you to track your portfolio with precision and up-to-the-minute
                 accuracy.
               </p>
               <p>
-                Beyond analytics, Cryptopilot features an intelligent auto trading
+                Beyond analytics, CryptoPilot features an intelligent auto trading
                 bot capable of executing trades on hourly, daily, and weekly
                 intervals based on market signals and your custom strategies.
                 This automation helps maximize your returns while minimizing
@@ -62,28 +62,28 @@ const About: React.FC = () => {
               description:
                 "Connect your wallets securely and get instant asset updates with live blockchain data streaming.",
               imgAlt: "Wallet Connect",
-              imgSrc: "images/wallet-connect.png",
+              imgSrc: "images/wallet.svg",
             },
             {
               title: "Asset Analysis",
               description:
                 "Gain deep insights into your crypto holdings with advanced analytics, historical trends, and risk assessments.",
               imgAlt: "Asset Analysis",
-              imgSrc: "images/asset-analysis.png",
+              imgSrc: "images/analytics.svg",
             },
             {
               title: "Auto Trading Bot",
               description:
                 "Automate your trading strategies with our smart bot that executes trades on your preferred hourly, daily, or weekly schedules.",
               imgAlt: "Auto Trading Bot",
-              imgSrc: "images/auto-trading.png",
+              imgSrc: "images/bot.svg",
             },
             {
               title: "Customizable Alerts",
               description:
                 "Stay ahead with personalized notifications on market movements and portfolio changes.",
               imgAlt: "Alerts",
-              imgSrc: "images/alerts.png",
+              imgSrc: "images/weekly.svg",
             },
           ].map(({ title, description, imgAlt, imgSrc }, index) => (
             <div key={index} className="col-sm-6 col-lg-3 mb-4">

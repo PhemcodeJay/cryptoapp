@@ -24,7 +24,7 @@ const WalletConnectPage: React.FC = () => {
       setMessage(response.message || 'Wallet synced successfully!');
       await fetchPortfolio(address, selectedChain);
       // Redirect after successful sync
-      navigate('/dashboardpage');
+      navigate('/dashboard');
     } catch (err: any) {
       console.error('Sync error:', err);
       setError(err.message || 'Sync failed');
@@ -66,6 +66,8 @@ const WalletConnectPage: React.FC = () => {
       fetchPortfolio(walletAddress, chain);
     }
   }, [chain]);
+
+  
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 flex flex-col items-center justify-center px-6 py-12 text-white font-sans">

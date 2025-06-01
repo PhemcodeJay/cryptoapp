@@ -10,10 +10,10 @@ const NavigationButtons: React.FC = () => (
       🔐 Connect Wallet
     </Link>
     <Link
-      to="/portfolio"
+      to="/dashboard"
       className="bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl shadow transition duration-200"
     >
-      📊 Portfolio Overview
+      📊 Dashboard
     </Link>
     <Link
       to="/asset-analysis"
@@ -51,7 +51,7 @@ const HeroSection: React.FC = () => (
       </h1>
       <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
         Web3 Wallet <br />
-        <span className="text-yellow-400">Portfolio & Trading Hub</span>
+        <span className="text-yellow-400">Analysis & Trading Hub</span>
       </h1>
       <p className="max-w-3xl mx-auto text-lg md:text-xl mb-8">
         Connect your Web3 wallet to track your assets in real-time, perform in-depth market analysis,
@@ -70,19 +70,19 @@ interface Feature {
 const Features: React.FC = () => {
   const features: Feature[] = [
     {
-      icon: 'wallet.svg',
+      icon: 'images/wallet.svg',
       title: 'Secure Web3 Wallet Integration',
       description:
         'Easily connect your Ethereum and other Web3 wallets with robust security and full privacy controls.',
     },
     {
-      icon: 'analytics.svg',
+      icon: 'images/analytics.svg',
       title: 'Advanced Asset Analysis',
       description:
         'Gain detailed insights on your holdings with real-time and historical performance charts, updated hourly, daily, and weekly.',
     },
     {
-      icon: 'bot.svg',
+      icon: 'images/bot.svg',
       title: 'Automated Trading Bot',
       description:
         'Configure your trading strategies and let our bot execute trades 24/7 on Hyperliquid with precision and speed.',
@@ -127,19 +127,19 @@ const TradingBotSchedule: React.FC = () => {
       title: 'Hourly',
       description:
         'Quick reactions to market changes using optimized scalping and momentum strategies.',
-      icon: 'hourly.svg',
+      icon: 'images/hourly.svg',
     },
     {
       title: 'Daily',
       description:
         'Comprehensive analysis of daily market trends to execute balanced trading plans with risk management.',
-      icon: 'daily.svg',
+      icon: 'images/daily.svg',
     },
     {
       title: 'Weekly',
       description:
         'Long-term portfolio adjustments and trend following based on weekly aggregated data.',
-      icon: 'weekly.svg',
+      icon: 'images/weekly.svg',
     },
   ];
 
@@ -187,7 +187,7 @@ const Footer: React.FC = () => (
         <ul>
           {[
             { label: 'Connect Wallet', path: '/wallet-connect' },
-            { label: 'Portfolio', path: '/portfolio' },
+            { label: 'Dashboard', path: '/dashboard' },
             { label: 'Asset Analysis', path: '/asset-analysis' },
             { label: 'Trading Bot', path: '/trading-bot' },
           ].map(({ label, path }) => (
